@@ -16,9 +16,12 @@ import {
   Activity,
   Plus,
   Zap,
+  Check,
+  Calendar,
+  Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { KudoButton } from '../common/KudoButton';
-import { motion } from 'motion/react';
 
 interface TodayViewProps {
   currentMember: Member;
@@ -27,8 +30,9 @@ interface TodayViewProps {
   moments: CommunityMoment[];
   onSelectChallenge: (challengeId: string) => void;
   onOpenLogModal: (defaultChallengeId?: string, defaultActivityId?: string) => void;
+  onJoinChallenge: (challengeId: string) => void;
   onNavigateToChallenges: () => void;
-  onNavigateToGroup: () => void;
+  onNavigateToGroup: (groupId?: string) => void;
   onKudoMoment: (momentId: string) => void;
 }
 
@@ -39,66 +43,78 @@ export const TodayView: React.FC<TodayViewProps> = ({
   moments,
   onSelectChallenge,
   onOpenLogModal,
+  onJoinChallenge,
   onNavigateToChallenges,
   onNavigateToGroup,
   onKudoMoment,
 }) => {
-  // Find streak challenge
-  const streakChallenge = challenges.find((c) => c.type === 'streak' && c.status === 'active');
+  // Challenges where current member is an active participant
+  const myActiveChallenges = challenges.filter(
+    (c) =>
+      c.status === 'active' &&
+      c.participants.some((p) => p.memberId === currentMember.id)
+  );
+
+  // Streak Challenge the member is in
+  const streakChallenge = myActiveChallenges.find((c) => c.type === 'streak');
   const streakParticipant = streakChallenge?.participants.find(
     (p) => p.memberId === currentMember.id
   );
 
-  // Find collective challenge
-  const collectiveChallenge = challenges.find(
-    (c) => c.type === 'collective' && c.status === 'active'
-  );
+  // Collective Challenge the member is in
+  const collectiveChallenge = myActiveChallenges.find((c) => c.type === 'collective');
   const collectiveParticipant = collectiveChallenge?.participants.find(
     (p) => p.memberId === currentMember.id
   );
 
-  // Find competitive challenge
-  const competitiveChallenge = challenges.find(
-    (c) => c.type === 'competitive' && c.status === 'active'
-  );
+  // Competitive Challenge the member is in
+  const competitiveChallenge = myActiveChallenges.find((c) => c.type === 'competitive');
   const competitiveParticipant = competitiveChallenge?.participants.find(
     (p) => p.memberId === currentMember.id
+  );
+
+  // Challenges available in the community that user has NOT joined yet
+  const unjoinedChallenges = challenges.filter(
+    (c) =>
+      c.status === 'active' &&
+      !c.participants.some((p) => p.memberId === currentMember.id)
   );
 
   const isMissedYesterday = streakParticipant?.missedYesterday;
   const todayDone = streakParticipant?.todayCompleted;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
-      {/* 1. Human greeting & Timezone context */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 pb-5">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-7">
+      {/* 1. Contextual Greeting & Daily Time Horizon */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-200/80 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-orange-600 uppercase tracking-wider">
+          <div className="flex items-center gap-2 text-[11px] font-bold text-orange-600 uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5" />
             <span>Tuesday, Sep 15 • Nairobi Time (EAT)</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mt-1 tracking-tight">
-            Ready to move, {currentMember.name.split(' ')[0]}?
+          <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 mt-1 tracking-tight">
+            What to do today, {currentMember.name.split(' ')[0]}
           </h1>
-          <p className="text-sm text-zinc-600 mt-0.5">
-            Here is your group's momentum and what needs your participation today.
+          <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
+            Your community commitments and active actions for today.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onOpenLogModal()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl shadow-md shadow-orange-600/20 transition-all cursor-pointer"
-          >
-            <Activity className="w-4 h-4" />
-            <span>Log an Activity</span>
-          </button>
+        {/* High-level status pill */}
+        <div className="self-start sm:self-auto flex items-center gap-2">
+          <div className="px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200/80 text-orange-800 text-xs font-bold flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-orange-600 fill-orange-600" />
+            <span>{myActiveChallenges.length} Active Challenges</span>
+          </div>
         </div>
       </div>
 
-      {/* 2. Streak Today Focus Card */}
+      {/* 2. Priority Action 1: Daily Streak Requirements */}
       {streakChallenge && streakParticipant && (
-        <section aria-labelledby="streak-heading" className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+        <section
+          aria-labelledby="streak-heading"
+          className="bg-white rounded-2xl border border-zinc-200 shadow-xs overflow-hidden"
+        >
           <div className="p-5 sm:p-6 bg-linear-to-r from-orange-500/10 via-amber-500/5 to-transparent border-b border-zinc-100">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-start gap-3.5">
@@ -106,14 +122,14 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
                     isMissedYesterday
                       ? 'bg-zinc-200 text-zinc-600'
-                      : 'bg-linear-to-tr from-orange-600 to-amber-500 text-white shadow-md shadow-orange-500/30'
+                      : 'bg-linear-to-tr from-orange-600 to-amber-500 text-white shadow-sm shadow-orange-500/25'
                   }`}
                 >
                   <Flame className="w-6 h-6 fill-current" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-orange-700 uppercase tracking-wider bg-orange-100 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold text-orange-800 uppercase tracking-wider bg-orange-100 px-2 py-0.5 rounded-md">
                       Daily Streak Challenge
                     </span>
                     <span className="text-xs text-zinc-500 font-medium">
@@ -128,16 +144,19 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   >
                     {streakChallenge.title}
                   </h2>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Hosted by {streakChallenge.groupName}
+                  </p>
                 </div>
               </div>
 
-              {/* Streak Stats pill */}
-              <div className="flex items-center gap-3 self-start sm:self-auto bg-white px-4 py-2 rounded-xl border border-zinc-200 shadow-xs">
+              {/* Streak Stats Counter */}
+              <div className="flex items-center gap-3 self-start sm:self-auto bg-white px-4 py-2 rounded-xl border border-zinc-200 shadow-2xs">
                 <div className="text-center">
                   <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
                     Current Streak
                   </span>
-                  <span className="text-xl font-extrabold text-orange-600 tabular-nums">
+                  <span className="text-xl font-black text-orange-600 tabular-nums">
                     {streakParticipant.currentStreak}
                     <span className="text-xs font-medium text-zinc-500 ml-0.5">days</span>
                   </span>
@@ -145,9 +164,9 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="h-7 w-px bg-zinc-200" />
                 <div className="text-center">
                   <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                    Completed
+                    Total Done
                   </span>
-                  <span className="text-xl font-extrabold text-zinc-800 tabular-nums">
+                  <span className="text-xl font-black text-zinc-800 tabular-nums">
                     {streakParticipant.daysCompleted}
                     <span className="text-xs font-medium text-zinc-400 ml-0.5">/30</span>
                   </span>
@@ -155,44 +174,44 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="h-7 w-px bg-zinc-200" />
                 <div className="text-center">
                   <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                    Best
+                    Best Streak
                   </span>
-                  <span className="text-xl font-extrabold text-zinc-700 tabular-nums">
+                  <span className="text-xl font-black text-zinc-700 tabular-nums">
                     {streakParticipant.bestStreak}d
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Missed Day Notice if applicable */}
+            {/* Missed Day Compassionate Reset Notice (David Persona) */}
             {isMissedYesterday && (
-              <div className="mt-4 p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
+              <div className="mt-4 p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold">Streak Reset Notice: </span>
-                  Yesterday's daily requirement was missed, resetting your current streak to 0.
-                  Your <span className="font-semibold">14 Days Completed</span> and{' '}
-                  <span className="font-semibold">14-Day Best Streak</span> remain securely recorded.
-                  Complete today to begin your new consecutive chain!
+                  Yesterday's requirement was missed, resetting your consecutive count to 0.
+                  Your <span className="font-semibold">{streakParticipant.daysCompleted} Total Days Completed</span> and{' '}
+                  <span className="font-semibold">{streakParticipant.bestStreak}-Day Best Record</span> remain safely stored.
+                  Complete today's movements below to restart your consecutive chain!
                 </div>
               </div>
             )}
           </div>
 
-          {/* Today's Requirements Checklist */}
+          {/* Today's Requirements Checklist with 1-Click Contextual Action */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-600">
+            <div className="flex items-center justify-between mb-3.5">
+              <div>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">
                   Today's Governed Requirements
                 </h3>
-                <span className="text-[11px] text-zinc-500 font-medium">
-                  (Both must be done before 23:59 EAT)
-                </span>
+                <p className="text-[11px] text-zinc-500">
+                  Must be logged before 23:59 EAT to lock in today's streak.
+                </p>
               </div>
               <span className="text-xs font-semibold text-zinc-500 flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-orange-500" />
-                <span>8h 36m remaining today</span>
+                <span>8h 24m remaining</span>
               </span>
             </div>
 
@@ -205,7 +224,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                     className={`p-4 rounded-xl border transition-all flex items-center justify-between ${
                       isDone
                         ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
-                        : 'bg-zinc-50/80 border-zinc-200 hover:border-orange-300'
+                        : 'bg-zinc-50/80 border-zinc-200/90 hover:border-orange-300'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -224,7 +243,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                         </p>
                         <p className="text-xs text-zinc-500">
                           Target: {act.targetValue} {act.unit}
-                          {isDone ? ' • Completed' : ' • Pending today'}
+                          {isDone ? ' • Completed today' : ' • Pending today'}
                         </p>
                       </div>
                     </div>
@@ -232,12 +251,12 @@ export const TodayView: React.FC<TodayViewProps> = ({
                     {!isDone ? (
                       <button
                         onClick={() => onOpenLogModal(streakChallenge.id, act.activityId)}
-                        className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg shadow-xs transition-colors cursor-pointer"
+                        className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer"
                       >
-                        Complete Now
+                        Log Now
                       </button>
                     ) : (
-                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-100/70 px-2.5 py-1 rounded-full">
+                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-full">
                         Done Today
                       </span>
                     )}
@@ -249,22 +268,22 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </section>
       )}
 
-      {/* 3. Active Group Challenges Overview (Grid) */}
+      {/* 3. Priority Action 2: Team Milestone & Race Actions */}
       <section aria-labelledby="active-challenges-heading" className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 id="active-challenges-heading" className="text-lg font-extrabold text-zinc-900 tracking-tight">
-              Active Group Challenges
+              Active Group Commitments
             </h2>
             <p className="text-xs text-zinc-500">
-              Shared commitments with {activeGroup.name}
+              Contribute your movement to community goals
             </p>
           </div>
           <button
             onClick={onNavigateToChallenges}
             className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
           >
-            <span>View all challenges</span>
+            <span>All Challenges</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -272,12 +291,17 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Collective Card */}
           {collectiveChallenge && (
-            <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between hover:border-zinc-300 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded-full">
-                    Together • Collective Goal
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded-md">
+                      Collective Target
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-medium">
+                      {collectiveChallenge.groupName}
+                    </span>
+                  </div>
                   <span className="text-xs font-medium text-zinc-500">
                     6 days left
                   </span>
@@ -293,7 +317,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   {collectiveChallenge.description}
                 </p>
 
-                {/* Collective Progress meter */}
+                {/* Progress Bar & Exceeded Support */}
                 <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-100">
                   <div className="flex items-baseline justify-between mb-1.5">
                     <span className="text-xs font-bold text-zinc-700">
@@ -309,24 +333,36 @@ export const TodayView: React.FC<TodayViewProps> = ({
 
                   <div className="w-full h-2.5 bg-zinc-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-linear-to-r from-orange-500 to-amber-500 rounded-full transition-all duration-500"
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        (collectiveChallenge.collectiveProgress?.percent || 0) >= 100
+                          ? 'bg-emerald-500'
+                          : 'bg-linear-to-r from-orange-500 to-amber-500'
+                      }`}
                       style={{
                         width: `${Math.min(100, collectiveChallenge.collectiveProgress?.percent || 0)}%`,
                       }}
                     />
                   </div>
 
+                  {(collectiveChallenge.collectiveProgress?.percent || 0) >= 100 && (
+                    <div className="mt-2 p-1.5 rounded-lg bg-emerald-100/70 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>Target Exceeded! Extra distance counts until deadline.</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between mt-2 text-[11px] text-zinc-500">
-                    <span>Your share: <strong className="text-zinc-800 font-bold">{collectiveParticipant?.accumulatedValue || 0} km</strong></span>
+                    <span>Your contribution: <strong className="text-zinc-800 font-bold">{collectiveParticipant?.accumulatedValue || 0} km</strong></span>
                     <span>{collectiveChallenge.participants.length} contributors</span>
                   </div>
                 </div>
               </div>
 
+              {/* Direct Contextual Action */}
               <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between">
                 <button
                   onClick={() => onOpenLogModal(collectiveChallenge.id, 'act-walking')}
-                  className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Contribute Distance</span>
@@ -342,14 +378,19 @@ export const TodayView: React.FC<TodayViewProps> = ({
             </div>
           )}
 
-          {/* Competitive Card */}
+          {/* Competitive Race Card */}
           {competitiveChallenge && (
-            <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between hover:border-zinc-300 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider bg-rose-100 px-2 py-0.5 rounded-full">
-                    Race • Qualifying 100 KM
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider bg-rose-100 px-2 py-0.5 rounded-md">
+                      Competitive Race
+                    </span>
+                    <span className="text-[11px] text-zinc-500 font-medium">
+                      {competitiveChallenge.groupName}
+                    </span>
+                  </div>
                   <span className="text-xs font-medium text-zinc-500">
                     15 days left
                   </span>
@@ -362,13 +403,13 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   {competitiveChallenge.title}
                 </h3>
                 <p className="text-xs text-zinc-600 mt-1 line-clamp-2 leading-relaxed">
-                  First participants to accumulate 100 km qualify for podium ranks.
+                  First participants to hit 100 km qualify for governed podium ranks.
                 </p>
 
-                {/* Standing highlight */}
+                {/* Race Status Snapshot */}
                 <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-100 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-500 font-medium">Your Progress</span>
+                    <span className="text-zinc-500 font-medium">Your Race Progress</span>
                     <span className="font-extrabold text-zinc-900 tabular-nums">
                       {competitiveParticipant?.accumulatedValue || 0} / 100 km
                     </span>
@@ -389,16 +430,17 @@ export const TodayView: React.FC<TodayViewProps> = ({
                       <span><strong>3</strong> finished already</span>
                     </span>
                     <span className="text-orange-600 font-semibold">
-                      15.5 km until finish
+                      {(100 - (competitiveParticipant?.accumulatedValue || 0)).toFixed(1)} km to finish
                     </span>
                   </div>
                 </div>
               </div>
 
+              {/* Direct Contextual Action */}
               <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between">
                 <button
                   onClick={() => onOpenLogModal(competitiveChallenge.id, 'act-running')}
-                  className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Log Running KM</span>
@@ -416,7 +458,66 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </div>
       </section>
 
-      {/* 4. Community Accountability & Recent Moments */}
+      {/* 4. Open Group Challenges to Join (Invitations / Explore) */}
+      {unjoinedChallenges.length > 0 && (
+        <section aria-labelledby="unjoined-heading" className="bg-amber-50/50 rounded-2xl border border-amber-200/80 p-5 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-amber-200/70 text-amber-800 flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 id="unjoined-heading" className="text-base font-extrabold text-zinc-900">
+                  Challenges in Your Groups You Can Join
+                </h2>
+                <p className="text-xs text-zinc-600">
+                  Open community initiatives ready for your affirmative participation.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {unjoinedChallenges.map((ch) => (
+              <div
+                key={ch.id}
+                className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
+                    <span>{ch.groupName}</span>
+                    <span className="text-orange-600">{ch.type}</span>
+                  </div>
+                  <h3
+                    onClick={() => onSelectChallenge(ch.id)}
+                    className="text-sm font-bold text-zinc-900 hover:text-orange-600 transition-colors cursor-pointer"
+                  >
+                    {ch.title}
+                  </h3>
+                  <p className="text-xs text-zinc-500 line-clamp-2 mt-1">
+                    {ch.description}
+                  </p>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-zinc-100 flex items-center justify-between">
+                  <span className="text-[11px] text-zinc-500">
+                    {ch.participants.length} participants
+                  </span>
+                  <button
+                    onClick={() => onJoinChallenge(ch.id)}
+                    className="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Join Challenge</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. Community Accountability & Recent Moments Feed */}
       <section aria-labelledby="community-moments-heading" className="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -425,24 +526,24 @@ export const TodayView: React.FC<TodayViewProps> = ({
             </div>
             <div>
               <h2 id="community-moments-heading" className="text-base font-extrabold text-zinc-900">
-                Community Accountability Moments
+                Community Accountability Feed
               </h2>
               <p className="text-xs text-zinc-500">
-                Real milestones from {activeGroup.name} members
+                Live activity logs, milestones, and achievements from your peers
               </p>
             </div>
           </div>
           <button
-            onClick={onNavigateToGroup}
+            onClick={() => onNavigateToGroup()}
             className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
           >
-            <span>Group Hub</span>
+            <span>Groups Hub</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         <div className="divide-y divide-zinc-100">
-          {moments.map((m) => (
+          {moments.slice(0, 5).map((m) => (
             <div key={m.id} className="py-3.5 first:pt-0 last:pb-0 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <img

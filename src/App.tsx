@@ -20,13 +20,15 @@ import {
   INITIAL_NOTIFICATIONS,
 } from './data/mockData';
 import { Header } from './components/common/Header';
-import { ExperienceBar } from './components/common/ExperienceBar';
+import { ReferenceDrawer } from './components/reference/ReferenceDrawer';
+import { ProfileDrawer } from './components/common/ProfileDrawer';
 import { NotificationsDrawer } from './components/common/NotificationsDrawer';
 import { TodayView } from './components/today/TodayView';
 import { ChallengeListView } from './components/challenges/ChallengeListView';
 import { ChallengeDetailView } from './components/challenges/ChallengeDetailView';
 import { CreateChallengeWizard } from './components/challenges/CreateChallengeWizard';
 import { LogActivityModal } from './components/activity/LogActivityModal';
+import { GroupListView } from './components/groups/GroupListView';
 import { GroupDetailView } from './components/groups/GroupDetailView';
 import { CreateGroupModal } from './components/groups/CreateGroupModal';
 import { ActivityCatalogueView } from './components/catalogue/ActivityCatalogueView';
@@ -37,6 +39,7 @@ export default function App() {
   // Navigation & View State
   const [currentTab, setCurrentTab] = useState<'today' | 'challenges' | 'groups' | 'catalogue'>('today');
   const [selectedChallengeId, setSelectedChallengeId] = useState<string | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
   // Entities State
   const [currentMember, setCurrentMember] = useState<Member>(CURRENT_USER_AMINA);
@@ -48,6 +51,8 @@ export default function App() {
   const [notifications, setNotifications] = useState<NotificationAlert[]>(INITIAL_NOTIFICATIONS);
 
   // Modals & Drawers State
+  const [referenceDrawerOpen, setReferenceDrawerOpen] = useState(false);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [createChallengeOpen, setCreateChallengeOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [logModalOpen, setLogModalOpen] = useState(false);
@@ -83,11 +88,12 @@ export default function App() {
     );
   };
 
-  // Quick Journey switcher from ExperienceBar
+  // Quick Journey switcher from ReferenceDrawer
   const handleSelectJourney = (journeyId: string) => {
     switch (journeyId) {
       case 'journey-today':
         setSelectedChallengeId(null);
+        setSelectedGroupId(null);
         setCurrentTab('today');
         break;
       case 'journey-collective':
@@ -104,6 +110,11 @@ export default function App() {
         break;
       case 'journey-create':
         setCreateChallengeOpen(true);
+        break;
+      case 'journey-catalogue':
+        setSelectedChallengeId(null);
+        setSelectedGroupId(null);
+        setCurrentTab('catalogue');
         break;
       default:
         break;
@@ -169,7 +180,7 @@ export default function App() {
           challengeTitle: ch.title,
           challengeType: ch.type,
           headline: 'Affirmatively Joined Challenge',
-          detail: `${currentMember.name} joined ${ch.title}. Ready to contribute!`,
+          detail: `${currentMember.name} joined ${ch.title} in ${ch.groupName}. Ready to contribute!`,
           timestamp: 'Just now',
           kudos: 3,
           hasKudoed: false,
@@ -232,7 +243,7 @@ export default function App() {
         challengeTitle: newChallenge.title,
         challengeType: newChallenge.type,
         headline: 'Launched New Community Challenge',
-        detail: `New challenge open for participation: "${newChallenge.title}".`,
+        detail: `New challenge open for participation: "${newChallenge.title}" in ${newChallenge.groupName}.`,
         timestamp: 'Just now',
         kudos: 4,
         hasKudoed: false,
@@ -245,6 +256,7 @@ export default function App() {
   const handleCreateGroup = (newGroup: Group) => {
     setAllGroups((prev) => [newGroup, ...prev]);
     setActiveGroup(newGroup);
+    setSelectedGroupId(newGroup.id);
     setCurrentTab('groups');
   };
 
@@ -316,37 +328,28 @@ export default function App() {
   };
 
   const selectedChallenge = challenges.find((c) => c.id === selectedChallengeId);
+  const viewingGroup = selectedGroupId
+    ? allGroups.find((g) => g.id === selectedGroupId) || activeGroup
+    : null;
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-zinc-900">
-      {/* 1. Engineering Experience Reference & Persona Switcher Bar */}
-      <ExperienceBar
-        currentMember={currentMember}
-        onSwitchMember={handleSwitchMember}
-        onSelectJourney={handleSelectJourney}
-        onOpenArchitectureDocs={() => setArchitectureDocsOpen(true)}
-        onToggleExceededState={handleToggleExceeded}
-        targetExceeded={targetExceeded}
-      />
-
-      {/* 2. Main Tiizi Brand & Navigation Header */}
+    <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-zinc-900 pb-16 md:pb-0">
+      {/* 1. Main Mobile-First Tiizi Header with Reference Trigger */}
       <Header
         currentTab={currentTab}
         onSelectTab={(tab) => {
           setSelectedChallengeId(null);
+          setSelectedGroupId(null);
           setCurrentTab(tab);
         }}
         currentMember={currentMember}
-        activeGroup={activeGroup}
-        allGroups={allGroups}
-        onSelectGroup={(grp) => setActiveGroup(grp)}
         unreadNotificationCount={notifications.filter((n) => !n.read).length}
         onOpenNotifications={() => setNotificationsDrawerOpen(true)}
-        onOpenCreateChallenge={() => setCreateChallengeOpen(true)}
-        onOpenLogModal={() => handleOpenLogModal()}
+        onOpenReferenceDrawer={() => setReferenceDrawerOpen(true)}
+        onOpenProfileDrawer={() => setProfileDrawerOpen(true)}
       />
 
-      {/* 3. Dynamic Human-Facing Content Body */}
+      {/* 2. Dynamic Human-Facing Content Body */}
       <main className="flex-1 pb-16">
         {selectedChallenge ? (
           /* Detailed Challenge Screen */
@@ -370,8 +373,16 @@ export default function App() {
             moments={moments}
             onSelectChallenge={(chId) => setSelectedChallengeId(chId)}
             onOpenLogModal={handleOpenLogModal}
+            onJoinChallenge={handleJoinChallenge}
             onNavigateToChallenges={() => setCurrentTab('challenges')}
-            onNavigateToGroup={() => setCurrentTab('groups')}
+            onNavigateToGroup={(grpId) => {
+              if (grpId) {
+                const found = allGroups.find((g) => g.id === grpId);
+                if (found) setActiveGroup(found);
+                setSelectedGroupId(grpId);
+              }
+              setCurrentTab('groups');
+            }}
             onKudoMoment={handleKudoMoment}
           />
         ) : currentTab === 'challenges' ? (
@@ -386,19 +397,34 @@ export default function App() {
             onRunAgain={handleRunAgain}
           />
         ) : currentTab === 'groups' ? (
-          /* Group Detail View */
-          <GroupDetailView
-            group={activeGroup}
-            currentMember={currentMember}
-            challenges={challenges}
-            moments={moments}
-            onSelectChallenge={(chId) => setSelectedChallengeId(chId)}
-            onJoinChallenge={handleJoinChallenge}
-            onLogChallenge={(chId) => handleOpenLogModal(chId)}
-            onOpenCreateChallenge={() => setCreateChallengeOpen(true)}
-            onOpenCreateGroup={() => setCreateGroupOpen(true)}
-            onKudoMoment={handleKudoMoment}
-          />
+          viewingGroup ? (
+            /* Group Detail View */
+            <GroupDetailView
+              group={viewingGroup}
+              currentMember={currentMember}
+              challenges={challenges}
+              moments={moments}
+              onBack={() => setSelectedGroupId(null)}
+              onSelectChallenge={(chId) => setSelectedChallengeId(chId)}
+              onJoinChallenge={handleJoinChallenge}
+              onLogChallenge={(chId) => handleOpenLogModal(chId)}
+              onOpenCreateChallenge={() => setCreateChallengeOpen(true)}
+              onOpenCreateGroup={() => setCreateGroupOpen(true)}
+              onKudoMoment={handleKudoMoment}
+            />
+          ) : (
+            /* Groups Directory View */
+            <GroupListView
+              groups={allGroups}
+              challenges={challenges}
+              currentMember={currentMember}
+              onSelectGroup={(grp) => {
+                setActiveGroup(grp);
+                setSelectedGroupId(grp.id);
+              }}
+              onOpenCreateGroup={() => setCreateGroupOpen(true)}
+            />
+          )
         ) : (
           /* Activity Guide Catalogue */
           <ActivityCatalogueView />
@@ -407,10 +433,10 @@ export default function App() {
 
       {/* Footer Note */}
       <footer className="bg-white border-t border-zinc-200 py-6 text-center text-xs text-zinc-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-zinc-900 tracking-tight">tiizi</span>
-            <span>• Group Fitness & Wellness Experience Reference</span>
+            <span>• Experience Reference & Governed Engine Prototype</span>
           </div>
           <p className="text-[11px] text-zinc-400">
             Product truth governs engines; Experience Reference governs human-facing assembly.
@@ -419,15 +445,46 @@ export default function App() {
             onClick={() => setArchitectureDocsOpen(true)}
             className="text-orange-600 hover:text-orange-700 font-bold text-xs underline cursor-pointer"
           >
-            Inspect UX Architecture Reference
+            UX Architecture & Governed Specs
           </button>
         </div>
       </footer>
 
-      {/* 4. Modals & Drawers */}
+      {/* 3. Reference Mode Drawer */}
+      <ReferenceDrawer
+        isOpen={referenceDrawerOpen}
+        onClose={() => setReferenceDrawerOpen(false)}
+        currentMember={currentMember}
+        onSwitchMember={handleSwitchMember}
+        onSelectJourney={handleSelectJourney}
+        onOpenArchitectureDocs={() => setArchitectureDocsOpen(true)}
+        onToggleExceededState={handleToggleExceeded}
+        targetExceeded={targetExceeded}
+      />
+
+      {/* 4. Profile & Persona Drawer */}
+      <ProfileDrawer
+        isOpen={profileDrawerOpen}
+        onClose={() => setProfileDrawerOpen(false)}
+        currentMember={currentMember}
+        allGroups={allGroups}
+        challenges={challenges}
+        onSelectGroup={(grpId) => {
+          setSelectedGroupId(grpId);
+          setCurrentTab('groups');
+        }}
+        onSelectChallenge={(chId) => {
+          setSelectedChallengeId(chId);
+          setCurrentTab('challenges');
+        }}
+        onOpenReferenceDrawer={() => setReferenceDrawerOpen(true)}
+      />
+
+      {/* 5. Modals */}
       <CreateChallengeWizard
         isOpen={createChallengeOpen}
         onClose={() => setCreateChallengeOpen(false)}
+        allGroups={allGroups}
         activeGroup={activeGroup}
         currentMember={currentMember}
         onCreateChallenge={handleCreateChallenge}

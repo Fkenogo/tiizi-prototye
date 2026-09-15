@@ -24,6 +24,7 @@ interface GroupDetailViewProps {
   currentMember: Member;
   challenges: Challenge[];
   moments: CommunityMoment[];
+  onBack?: () => void;
   onSelectChallenge: (challengeId: string) => void;
   onJoinChallenge: (challengeId: string) => void;
   onLogChallenge: (challengeId: string) => void;
@@ -37,6 +38,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
   currentMember,
   challenges,
   moments,
+  onBack,
   onSelectChallenge,
   onJoinChallenge,
   onLogChallenge,
@@ -53,6 +55,17 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      {onBack && (
+        <div>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-600 hover:text-zinc-900 bg-white px-3 py-1.5 rounded-lg border border-zinc-200 shadow-2xs hover:bg-zinc-50 transition-colors cursor-pointer"
+          >
+            <span>← Back to All Groups</span>
+          </button>
+        </div>
+      )}
+
       {/* Group Hero Banner */}
       <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-xs">
         <div className="relative h-48 sm:h-64 w-full bg-zinc-900">
