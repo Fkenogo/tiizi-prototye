@@ -1,0 +1,6 @@
+{
+  "name": "Tiizi — Group Fitness & Wellness",
+  "description": "Experience Reference prototype for Tiizi, a group fitness and wellness platform centered around shared challenges, participation, and accountability.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
