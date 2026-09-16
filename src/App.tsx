@@ -3,11 +3,13 @@ import {
   Member,
   Group,
   Challenge,
+  ChallengeTemplateDraft,
   ActivitySubmission,
   CommunityMoment,
   NotificationAlert,
   SurfaceMode,
   OperatorSection,
+  OperatorTemplateRow,
   NavigationVariant,
 } from './types';
 import {
@@ -21,7 +23,9 @@ import {
   EXTRA_CHALLENGES,
   EXTENDED_NOTIFICATIONS,
   EXTENDED_GROUPS_META,
+  CHALLENGE_TEMPLATES,
 } from './data/mockData';
+import { OPERATOR_TEMPLATES } from './data/operatorMockData';
 import { Header, MemberTab } from './components/common/Header';
 import { ExperienceBar } from './components/common/ExperienceBar';
 import { ReferenceDrawer } from './components/reference/ReferenceDrawer';
@@ -50,7 +54,7 @@ import { OperatorUsers } from './components/operator/OperatorUsers';
 import { OperatorGroups } from './components/operator/OperatorGroups';
 import { OperatorActivities } from './components/operator/OperatorActivities';
 import { OperatorChallenges } from './components/operator/OperatorChallenges';
-import { OperatorTemplates } from './components/operator/OperatorTemplates';
+import { OperatorTemplates, MemberTemplateEntry, draftToMemberEntry } from './components/operator/OperatorTemplates';
 import { OperatorApprovals, OperatorAttention } from './components/operator/OperatorWorkqueues';
 import {
   OperatorDonations,
@@ -101,10 +105,27 @@ export default function App() {
     ...EXTENDED_NOTIFICATIONS,
   ]);
 
+  // Template catalogue state: member-visible entries vs operator rows.
+  // Published templates appear in member browse; drafts/retired stay hidden.
+  const [memberTemplates, setMemberTemplates] = useState<MemberTemplateEntry[]>(CHALLENGE_TEMPLATES);
+  const [opTemplates, setOpTemplates] = useState<OperatorTemplateRow[]>(OPERATOR_TEMPLATES);
+  const [templateDrafts, setTemplateDrafts] = useState<Record<string, ChallengeTemplateDraft>>({});
+  const [templateVisibility, setTemplateVisibility] = useState<Record<string, 'members' | 'hidden'>>({});
+  const opStatusOf = (id: string) => opTemplates.find((t) => t.id === id)?.status ?? 'published';
+  const memberVisibleTemplates = memberTemplates.filter(
+    (t) => opStatusOf(t.id) === 'published' && (templateVisibility[t.id] ?? 'members') === 'members'
+  );
+  // Wizard can also start from unpublished drafts (operator preview/build).
+  const draftEntries: MemberTemplateEntry[] = Object.values(templateDrafts)
+    .filter((d: ChallengeTemplateDraft) => !memberTemplates.some((t: MemberTemplateEntry) => t.id === d.id))
+    .map((d: ChallengeTemplateDraft) => draftToMemberEntry(d));
+  const wizardTemplateSource: MemberTemplateEntry[] = [...memberTemplates, ...draftEntries];
+
   // Modals & Drawers State
   const [referenceDrawerOpen, setReferenceDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [createChallengeOpen, setCreateChallengeOpen] = useState(false);
+  const [wizardAuthoring, setWizardAuthoring] = useState<'challenge' | 'template'>('challenge');
   const [wizardTemplateId, setWizardTemplateId] = useState<string | undefined>(undefined);
   const [wizardKey, setWizardKey] = useState(0);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
@@ -255,9 +276,48 @@ export default function App() {
   };
 
   const handleUseTemplate = (tplId: string) => {
+    setWizardAuthoring('challenge');
     setWizardTemplateId(tplId);
     setWizardKey((k) => k + 1);
     setCreateChallengeOpen(true);
+  };
+
+  const handleCreateTemplateMode = () => {
+    setWizardAuthoring('template');
+    setWizardTemplateId(undefined);
+    setWizardKey((k) => k + 1);
+    setCreateChallengeOpen(true);
+  };
+
+  const handleCreateTemplateDraft = (draft: ChallengeTemplateDraft) => {
+    // Template authoring ends in a Draft Template — never a live Challenge.
+    // Members can't see it until an operator publishes it.
+    setTemplateDrafts((prev) => ({ ...prev, [draft.id]: draft }));
+    setOpTemplates((prev) => [
+      {
+        id: draft.id,
+        name: draft.name,
+        type: draft.type,
+        status: 'draft',
+        uses: 0,
+        locales: draft.locales,
+        updated: 'Just now (mock)',
+        editableFields: draft.editableFields,
+      },
+      ...prev,
+    ]);
+    setTemplateVisibility((prev) => ({ ...prev, [draft.id]: draft.visibility }));
+    setWizardAuthoring('challenge');
+    setSurface('operator');
+    setOperatorSection('templates');
+  };
+
+  const handlePublishMemberEntry = (entry: MemberTemplateEntry) => {
+    setMemberTemplates((prev) => (prev.some((t) => t.id === entry.id) ? prev.map((t) => (t.id === entry.id ? entry : t)) : [...prev, entry]));
+  };
+
+  const handleWithdrawMemberEntry = (id: string) => {
+    setMemberTemplates((prev) => prev.filter((t) => t.id !== id));
   };
 
   const selectedChallenge = challenges.find((c) => c.id === selectedChallengeId);
@@ -268,12 +328,26 @@ export default function App() {
     return (
       <div className="min-h-screen bg-zinc-100">
         <OperatorShell section={operatorSection} onNavigate={setOperatorSection} onExitToMember={() => setSurface('member')} alertCount={7}>
-          {operatorSection === 'overview' && <OperatorOverview />}
+          {operatorSection === 'overview' && <OperatorOverview onNavigate={setOperatorSection} counts={{ draftsAwaiting: opTemplates.filter((t) => t.status === 'draft').length, attentionOpen: 7 }} />}
           {operatorSection === 'users' && <OperatorUsers />}
           {operatorSection === 'groups' && <OperatorGroups />}
           {operatorSection === 'activities' && <OperatorActivities />}
           {operatorSection === 'challenges' && <OperatorChallenges />}
-          {operatorSection === 'templates' && <OperatorTemplates onUseTemplate={(id) => { setSurface('member'); handleUseTemplate(id); }} />}
+          {operatorSection === 'templates' && (
+            <OperatorTemplates
+              opTemplates={opTemplates}
+              onOpTemplatesChange={setOpTemplates}
+              drafts={templateDrafts}
+              onDraftsChange={setTemplateDrafts}
+              visibility={templateVisibility}
+              onVisibilityChange={setTemplateVisibility}
+              memberEntries={memberTemplates}
+              onUseTemplate={(id) => { setSurface('member'); handleUseTemplate(id); }}
+              onCreateTemplateMode={handleCreateTemplateMode}
+              onPublishMemberEntry={handlePublishMemberEntry}
+              onWithdrawMemberEntry={handleWithdrawMemberEntry}
+            />
+          )}
           {operatorSection === 'approvals' && (
             <div className="space-y-6"><OperatorApprovals /><OperatorAttention /></div>
           )}
@@ -284,6 +358,21 @@ export default function App() {
           {operatorSection === 'audit' && <OperatorAudit />}
           {operatorSection === 'settings' && <OperatorSettings />}
         </OperatorShell>
+        {/* Same Challenge Creation Wizard in Template Authoring mode (operator) —
+            ends as a Draft Template, never a live Challenge. */}
+        <CreateChallengeWizard
+          key={wizardKey}
+          isOpen={createChallengeOpen}
+          onClose={() => { setCreateChallengeOpen(false); setWizardAuthoring('challenge'); }}
+          allGroups={allGroups}
+          activeGroup={activeGroup}
+          currentMember={currentMember}
+          onCreateChallenge={handleCreateChallenge}
+          initialTemplateId={wizardTemplateId}
+          authoringMode={wizardAuthoring}
+          onCreateTemplate={handleCreateTemplateDraft}
+          templates={wizardTemplateSource}
+        />
         <ReferenceDrawer
           isOpen={referenceDrawerOpen}
           onClose={() => setReferenceDrawerOpen(false)}
@@ -406,7 +495,7 @@ export default function App() {
         ) : memberTab === 'onboarding' ? (
           <OnboardingView onBrowseGroups={() => setMemberTab('groups')} onBrowseChallenges={() => setMemberTab('challenges')} onOpenToday={() => setMemberTab('today')} />
         ) : memberTab === 'templates' ? (
-          <TemplateGalleryView onUseTemplate={handleUseTemplate} />
+          <TemplateGalleryView onUseTemplate={handleUseTemplate} templates={memberVisibleTemplates} />
         ) : memberTab === 'support' ? (
           <SupportView />
         ) : memberTab === 'profile' ? (
@@ -474,12 +563,15 @@ export default function App() {
       <CreateChallengeWizard
         key={wizardKey}
         isOpen={createChallengeOpen}
-        onClose={() => setCreateChallengeOpen(false)}
+        onClose={() => { setCreateChallengeOpen(false); setWizardAuthoring('challenge'); }}
         allGroups={allGroups}
         activeGroup={activeGroup}
         currentMember={currentMember}
         onCreateChallenge={handleCreateChallenge}
         initialTemplateId={wizardTemplateId}
+        authoringMode={wizardAuthoring}
+        onCreateTemplate={handleCreateTemplateDraft}
+        templates={wizardTemplateSource}
       />
 
       <CreateGroupModal isOpen={createGroupOpen} onClose={() => setCreateGroupOpen(false)} currentMember={currentMember} onCreateGroup={handleCreateGroup} />

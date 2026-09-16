@@ -167,6 +167,9 @@ export interface Challenge {
   isCause?: boolean;
   causeName?: string;
   participants: ParticipantContribution[];
+  // Optional challenge-linked voluntary Support Tiizi (never a requirement;
+  // never affects eligibility, progress, recognition or results).
+  supportTiizi?: ChallengeSupportConfig;
   // Collective Specific
   collectiveProgress?: {
     totalAccumulated: number;
@@ -179,6 +182,58 @@ export interface Challenge {
     totalDays: number;
     currentDayNumber: number;
   };
+}
+
+// Optional per-challenge Support Tiizi offer. Voluntary, off by default,
+// never mandatory, never scored.
+export interface ChallengeSupportConfig {
+  enabled: boolean;
+  suggestedAmounts: number[];
+  allowCustom: boolean;
+  offerWhen: 'join' | 'during' | 'both';
+  currency?: string;
+}
+
+// Group Charter (member-visible agreement; experience architecture, no
+// backend enforcement invented here).
+export interface GroupCharter {
+  version: string;
+  state: 'draft' | 'active';
+  clauses: string[];
+  updated: string;
+}
+
+// Optional Group Council (disabled by default; labelled prototype config,
+// no voting authority invented).
+export interface GroupCouncil {
+  enabled: boolean;
+  kind?: 'advisory' | 'challenge_committee' | 'moderation';
+  purpose?: string;
+  members: string[];
+  stewardRep?: string;
+}
+
+// Template draft produced by operator Template Authoring mode (same
+// Challenge Creation Wizard concept; ends as a Draft Template, never a
+// live Challenge).
+export interface ChallengeTemplateDraft {
+  id: string;
+  name: string;
+  type: ChallengeType;
+  description: string;
+  durationDays: number;
+  activityId?: string;
+  metric?: MetricType;
+  unit?: string;
+  targetValue?: number;
+  activityIds?: string[];
+  metrics?: MetricType[];
+  units?: string[];
+  targetValues?: number[];
+  editableFields: string;
+  visibility: 'members' | 'hidden';
+  locales: string;
+  supportTiizi?: ChallengeSupportConfig;
 }
 
 export interface ActivitySubmission {
@@ -344,13 +399,20 @@ export interface ApprovalItem {
   detail: string;
   severity: 'low' | 'medium' | 'high';
   age: string;
-  status: 'pending' | 'approved' | 'dismissed' | 'escalated';
+  status: 'pending' | 'approved' | 'rejected' | 'changes_requested' | 'dismissed' | 'escalated' | 'assigned' | 'resolved';
   mockLabel: string;
+  // Review-detail context (prototype only)
+  requester?: string;
+  date?: string;
+  entity?: string;
+  context?: string;
+  priorActions?: string;
+  recommendation?: string;
 }
 
 export interface DonationRecord {
   id: string;
-  kind: 'tiizi_support' | 'cause_support';
+  kind: 'tiizi_support' | 'challenge_support' | 'cause_support';
   contributor: string;
   amount: string;
   date: string;
@@ -358,6 +420,10 @@ export interface DonationRecord {
   channel: string;
   reconciliation: 'matched' | 'unmatched' | 'n/a';
   note: string;
+  // Detail-management context (prototype only)
+  challenge?: string;
+  cause?: string;
+  history?: string;
 }
 
 export interface LocaleCoverage {

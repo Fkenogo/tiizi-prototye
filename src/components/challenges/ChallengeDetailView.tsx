@@ -49,6 +49,9 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
   onKudoSubmission,
 }) => {
   const [showGuidance, setShowGuidance] = useState(false);
+  // Optional challenge-linked Support Tiizi (member choice; sample only)
+  const [supportPicked, setSupportPicked] = useState<string | null>(null);
+  const support = challenge.supportTiizi?.enabled ? challenge.supportTiizi : null;
 
   const isParticipant = challenge.participants.some(
     (p) => p.memberId === currentMember.id
@@ -224,6 +227,27 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
         )}
         {challenge.finalized && challenge.status !== 'completed' && (
           <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3 text-xs"><strong className="text-amber-400">Results are in:</strong> this record is read-only.</div>
+        )}
+
+        {/* Optional Support Tiizi — only where the challenge enables it. Voluntary, never scored. */}
+        {support && !isCompleted && (
+          <div className="bg-sky-50/70 border-b border-sky-200/70 px-5 sm:px-6 py-3.5 text-xs">
+            <p className="font-bold text-sky-950">Support Tiizi <span className="ml-1 font-semibold text-sky-700">Optional — your challenge is not affected</span></p>
+            <p className="text-sky-900 mt-0.5">Take part with $0 — always fine. Anything you give keeps Tiizi running; it never changes your progress or results.</p>
+            {supportPicked === null ? (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {support.suggestedAmounts.map((a) => (
+                  <button key={a} onClick={() => setSupportPicked(`$${a}`)} className="px-3 py-1.5 bg-white hover:bg-sky-100 border border-sky-200 text-sky-900 text-xs font-bold rounded-lg cursor-pointer">${a}</button>
+                ))}
+                {support.allowCustom && (
+                  <button onClick={() => setSupportPicked('custom')} className="px-3 py-1.5 bg-white hover:bg-sky-100 border border-sky-200 text-sky-900 text-xs font-bold rounded-lg cursor-pointer">Custom</button>
+                )}
+                <button onClick={() => setSupportPicked('skipped')} className="px-3 py-1.5 text-sky-800 text-xs font-bold rounded-lg hover:underline cursor-pointer">Skip</button>
+              </div>
+            ) : (
+              <p className="mt-2 font-bold text-sky-900">{supportPicked === 'skipped' ? 'Skipped — enjoy your challenge!' : `Thanks — ${supportPicked} recorded (sample). Your progress is unaffected.`}</p>
+            )}
+          </div>
         )}
 
         {/* Finished challenge notice */}

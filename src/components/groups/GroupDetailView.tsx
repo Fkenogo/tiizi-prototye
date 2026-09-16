@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Group, Member, Challenge, CommunityMoment } from '../../types';
-import { ALL_MEMBERS } from '../../data/mockData';
+import { ALL_MEMBERS, GROUP_CHARTERS, GROUP_COUNCILS } from '../../data/mockData';
 import {
   Users,
   Shield,
@@ -318,6 +318,42 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
                 </li>
               ))}
             </ul>
+          </div>
+
+          {GROUP_CHARTERS[group.id] && (
+            <div className="pt-4 border-t border-zinc-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">
+                Group Charter <span className="ml-1 normal-case font-semibold text-zinc-400">{GROUP_CHARTERS[group.id].version}{GROUP_CHARTERS[group.id].state === 'draft' ? ' (draft)' : ''}</span>
+              </h3>
+              <ul className="space-y-2">
+                {GROUP_CHARTERS[group.id].clauses.map((c, idx) => (
+                  <li key={idx} className="text-xs text-zinc-700 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="pt-4 border-t border-zinc-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">
+              Stewards{GROUP_COUNCILS[group.id]?.enabled ? ' & Council' : ''}
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {groupStewards.map((s) => (
+                <span key={s.id} className="text-[11px] font-bold bg-orange-100 text-orange-800 px-2 py-1 rounded-lg">{s.name} · Steward</span>
+              ))}
+            </div>
+            {GROUP_COUNCILS[group.id]?.enabled ? (
+              <div className="mt-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs">
+                <p className="font-bold">Advisory council{GROUP_COUNCILS[group.id].kind ? ` · ${GROUP_COUNCILS[group.id].kind!.replace('_', ' ')}` : ''}</p>
+                {GROUP_COUNCILS[group.id].purpose && <p className="text-zinc-600 mt-0.5">{GROUP_COUNCILS[group.id].purpose}</p>}
+                <p className="text-zinc-600 mt-1">{GROUP_COUNCILS[group.id].members.join(' · ')}</p>
+              </div>
+            ) : (
+              <p className="text-[11px] text-zinc-500 mt-2">No council — the stewards look after this group.</p>
+            )}
           </div>
         </div>
       )}

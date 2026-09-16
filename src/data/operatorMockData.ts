@@ -54,6 +54,22 @@ export const METRIC_COMPATIBILITY = [
   { activity: 'Breathing Practice', metric: 'Duration', units: 'minutes', eligible: true, note: 'Streak eligible' },
   { activity: 'Breathing Practice', metric: 'Completion', units: 'done', eligible: false, note: 'Reference only — not challenge-counted in prototype' },
   { activity: 'Mindful Meditation', metric: 'Duration', units: 'minutes', eligible: false, note: 'Missing content — blocked until review' },
+  { activity: 'Loaded Squat (planned)', metric: 'Weight', units: 'kg, lb', eligible: false, note: 'Incomplete — pick a load reporting basis before enabling', loadBasis: 'TOTAL_LOADED_IMPLEMENT' },
+];
+
+export type LoadReportingBasis =
+  | 'TOTAL_LOADED_IMPLEMENT'
+  | 'PER_IMPLEMENT'
+  | 'SINGLE_IMPLEMENT'
+  | 'PER_SIDE'
+  | 'MACHINE_DISPLAYED_LOAD';
+
+export const LOAD_BASIS_OPTIONS: { id: LoadReportingBasis; label: string }[] = [
+  { id: 'TOTAL_LOADED_IMPLEMENT', label: 'Total loaded weight (whole implement)' },
+  { id: 'PER_IMPLEMENT', label: 'Per implement (e.g. per dumbbell)' },
+  { id: 'SINGLE_IMPLEMENT', label: 'Single implement total' },
+  { id: 'PER_SIDE', label: 'Per side (left / right reported separately)' },
+  { id: 'MACHINE_DISPLAYED_LOAD', label: 'Machine displayed load' },
 ];
 
 export const OPERATOR_CHALLENGES: OperatorChallengeRow[] = [
@@ -75,20 +91,21 @@ export const OPERATOR_TEMPLATES: OperatorTemplateRow[] = [
 ];
 
 export const APPROVALS_QUEUE: ApprovalItem[] = [
-  { id: 'ap-1', kind: 'group_join', title: '5 join requests — Kilimani Endurance Club', detail: 'Restricted group (stewards_only rule). Oldest request 4 days ago.', severity: 'medium', age: '4d', status: 'pending', mockLabel: 'Mock approval' },
-  { id: 'ap-2', kind: 'content_publish', title: 'Plank needs review', detail: 'Missing Swahili translation; safety guidance updated in draft.', severity: 'medium', age: '2d', status: 'pending', mockLabel: 'Mock approval' },
-  { id: 'ap-3', kind: 'template_publish', title: 'Push-Up & Plank Consistency (draft → publish)', detail: 'Draft template awaiting content sign-off.', severity: 'low', age: '1d', status: 'pending', mockLabel: 'Mock approval' },
-  { id: 'ap-4', kind: 'moderation', title: 'Reported challenge: Midnight Ultra', detail: '2 member reports: unrealistic target pairing (mock).', severity: 'high', age: '6h', status: 'pending', mockLabel: 'Mock review' },
-  { id: 'ap-5', kind: 'account_review', title: 'Suspended account appeal: Brian O.', detail: 'Appeal message attached (mock). Review accuracy logs.', severity: 'high', age: '3h', status: 'pending', mockLabel: 'Mock review' },
-  { id: 'ap-6', kind: 'localisation_gap', title: 'Swahili gaps: 3 activities', detail: 'Side Plank, Plank, Meditation missing sw copy.', severity: 'low', age: '5d', status: 'pending', mockLabel: 'Mock attention' },
-  { id: 'ap-7', kind: 'donation_review', title: 'Unmatched cause record (mock)', detail: 'KES 1,000 self-reported external cause pledge without matched movement log. Tiizi holds no funds.', severity: 'medium', age: '1d', status: 'pending', mockLabel: 'Mock attention' },
+  { id: 'ap-1', kind: 'group_join', title: '5 join requests — Kilimani Endurance Club', detail: 'Restricted group (stewards_only rule). Oldest request 4 days ago.', severity: 'medium', age: '4d', status: 'pending', mockLabel: 'Mock approval', requester: '5 members incl. Faith Njeri (mock)', date: 'Oldest Sep 11, 2026', entity: 'Groups › Kilimani Endurance Club', context: 'Group restricts creation and joins to stewards by group rule. Requests include a short intro line each.', priorActions: 'None yet (mock).', recommendation: 'Approve genuine runners, reject spam, or assign to steward Kipchoge.' },
+  { id: 'ap-2', kind: 'content_publish', title: 'Plank needs review', detail: 'Missing Swahili translation; safety guidance updated in draft.', severity: 'medium', age: '2d', status: 'pending', mockLabel: 'Mock approval', requester: 'Content Manager (mock)', date: 'Sep 13, 2026', entity: 'Activities › Plank (PLANK v3)', context: 'Draft updates safety guidance; Swahili copy still missing. Publishing without sw keeps fallback to English.', priorActions: 'v2 → v3 draft saved Sep 13 (mock).', recommendation: 'Request changes (add sw) or approve with fallback noted.' },
+  { id: 'ap-3', kind: 'template_publish', title: 'Push-Up & Plank Consistency (draft → publish)', detail: 'Draft template awaiting content sign-off.', severity: 'low', age: '1d', status: 'pending', mockLabel: 'Mock approval', requester: 'Content Manager (mock)', date: 'Sep 14, 2026', entity: 'Templates › Push-Up & Plank Consistency', context: 'Draft template; publishing makes it appear in member Template browse.', priorActions: 'Draft created Sep 2026 (mock).', recommendation: 'Approve to publish, or request changes to daily requirements.' },
+  { id: 'ap-4', kind: 'moderation', title: 'Reported challenge: Midnight Ultra', detail: '2 member reports: unrealistic target pairing (mock).', severity: 'high', age: '6h', status: 'pending', mockLabel: 'Mock review', requester: '2 members (mock reports)', date: 'Today, ~6h ago', entity: 'Challenges › Flagged: Midnight Ultra', context: 'Reports say the 50 km / 8-day pairing is unrealistic for this group. No harm reported.', priorActions: 'Flagged Sep 15 (mock).', recommendation: 'Restrict pending review, dismiss, or escalate to steward.' },
+  { id: 'ap-5', kind: 'account_review', title: 'Suspended account appeal: Brian O.', detail: 'Appeal message attached (mock). Review accuracy logs.', severity: 'high', age: '3h', status: 'pending', mockLabel: 'Mock review', requester: 'Brian Otieno (mock appeal)', date: 'Today, ~3h ago', entity: 'Users › Brian Otieno', context: 'Suspended for repeated inaccurate logs (mock). Appeal claims a faulty watch sync.', priorActions: 'Suspended Sep 10 (mock).', recommendation: 'Reactivate with warning, keep suspended, or assign to Support.' },
+  { id: 'ap-6', kind: 'localisation_gap', title: 'Swahili gaps: 3 activities', detail: 'Side Plank, Plank, Meditation missing sw copy.', severity: 'low', age: '5d', status: 'pending', mockLabel: 'Mock attention', requester: 'Content system (mock)', date: 'Sep 10, 2026', entity: 'Content › sw locale (partial)', context: 'Members see English fallback. No breakage — coverage gap only.', priorActions: 'None yet (mock).', recommendation: 'Assign to a translator or resolve when done.' },
+  { id: 'ap-7', kind: 'donation_review', title: 'Unmatched cause record (mock)', detail: 'KES 1,000 self-reported external cause pledge without matched movement log. Tiizi holds no funds.', severity: 'medium', age: '1d', status: 'pending', mockLabel: 'Mock attention', requester: 'Eric M. (mock)', date: 'Sep 13, 2026', entity: 'Donations › don-4', context: 'Self-reported external pledge; nothing to verify or hold. Reconciliation is informational.', priorActions: 'Flagged unmatched Sep 14 (mock).', recommendation: 'Resolve with a note, or assign to Support for follow-up.' },
 ];
 
 export const DONATION_RECORDS: DonationRecord[] = [
-  { id: 'don-1', kind: 'tiizi_support', contributor: 'Amina O.', amount: 'KES 500', date: 'Sep 2, 2026', status: 'recorded', channel: 'M-Pesa (mock)', reconciliation: 'n/a', note: 'Prototype record only. Tiizi support is not custodial charity processing.' },
-  { id: 'don-2', kind: 'tiizi_support', contributor: 'Anonymous (mock)', amount: 'KES 1,000', date: 'Aug 28, 2026', status: 'recorded', channel: 'Card (mock)', reconciliation: 'n/a', note: 'Prototype record only.' },
-  { id: 'don-3', kind: 'cause_support', contributor: 'Nairobi Morning Movers', amount: '438 km dedicated', date: 'Sep 15, 2026', status: 'recorded', channel: 'Movement pledge', reconciliation: 'matched', note: 'Dedication to City Parks awareness. No funds held by Tiizi.' },
-  { id: 'don-4', kind: 'cause_support', contributor: 'Eric M. (mock)', amount: 'KES 1,000 self-reported pledge', date: 'Sep 13, 2026', status: 'attention', channel: 'External pledge (self-reported)', reconciliation: 'unmatched', note: 'Self/community-reported only; fulfilled outside Tiizi. Tiizi holds no funds and verifies no totals.' },
+  { id: 'don-1', kind: 'tiizi_support', contributor: 'Amina O.', amount: 'KES 500', date: 'Sep 2, 2026', status: 'recorded', channel: 'M-Pesa (mock)', reconciliation: 'n/a', note: 'Prototype record only. General platform support — not tied to any challenge.', history: 'Recorded Sep 2 (mock) · no issues' },
+  { id: 'don-2', kind: 'tiizi_support', contributor: 'Anonymous (mock)', amount: 'KES 1,000', date: 'Aug 28, 2026', status: 'recorded', channel: 'Card (mock)', reconciliation: 'n/a', note: 'Prototype record only.', history: 'Recorded Aug 28 (mock) · no issues' },
+  { id: 'don-5', kind: 'challenge_support', contributor: 'Sarah C. (mock)', amount: '$2', date: 'Sep 11, 2026', status: 'recorded', channel: 'In-challenge offer (mock)', reconciliation: 'n/a', note: 'Voluntary Support Tiizi gift made while joining. Never affects eligibility, progress or results.', challenge: 'Walk Nairobi Together', history: 'Offered on Join Sep 11 (mock) · skipped-or-gave freely · no issues' },
+  { id: 'don-3', kind: 'cause_support', contributor: 'Nairobi Morning Movers', amount: '438 km dedicated', date: 'Sep 15, 2026', status: 'recorded', channel: 'Movement pledge', reconciliation: 'matched', note: 'Dedication to City Parks awareness. No funds held by Tiizi.', challenge: 'Walk Nairobi Together', cause: 'City Parks Preservation Initiative (Community Awareness)', history: 'Dedication logged Sep 10–15 (mock) · matched to movement logs' },
+  { id: 'don-4', kind: 'cause_support', contributor: 'Eric M. (mock)', amount: 'KES 1,000 self-reported pledge', date: 'Sep 13, 2026', status: 'attention', channel: 'External pledge (self-reported)', reconciliation: 'unmatched', note: 'Self/community-reported only; fulfilled outside Tiizi. Tiizi holds no funds and verifies no totals.', cause: 'City Parks Preservation Initiative (Community Awareness)', history: 'Reported Sep 13 (mock) · no matched movement log · needs review' },
 ];
 
 export const LOCALE_COVERAGE: LocaleCoverage[] = [

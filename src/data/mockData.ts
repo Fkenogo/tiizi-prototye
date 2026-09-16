@@ -1,4 +1,4 @@
-import { Group, Member, Challenge, ActivitySubmission, CommunityMoment, NotificationAlert } from '../types';
+import { Group, Member, Challenge, ActivitySubmission, CommunityMoment, NotificationAlert, GroupCharter, GroupCouncil } from '../types';
 
 export const CURRENT_USER_AMINA: Member = {
   id: 'user-amina',
@@ -226,6 +226,15 @@ export const INITIAL_CHALLENGES: Challenge[] = [
     summarySentence: 'Everyone in Nairobi Morning Movers contributes toward 500 km of Walking over 14 days.',
     isCause: true,
     causeName: 'City Parks Preservation Initiative (Community Awareness)',
+    // Optional challenge-linked voluntary Support Tiizi: off-by-default
+    // concept, enabled here as the prototype example. Never required.
+    supportTiizi: {
+      enabled: true,
+      suggestedAmounts: [1, 2, 5],
+      allowCustom: true,
+      offerWhen: 'both',
+      currency: '$',
+    },
     participants: [
       {
         memberId: 'user-amina',
@@ -877,6 +886,101 @@ export const EXTENDED_GROUPS_META: Record<string, { healthState: 'healthy' | 're
   'grp-nairobi-movers': { healthState: 'healthy', creationPermission: 'open', pendingRequests: 2 },
   'grp-kilimani-endurance': { healthState: 'restricted', creationPermission: 'stewards_only', pendingRequests: 5 },
   'grp-zenith-mind': { healthState: 'flagged', creationPermission: 'open', pendingRequests: 0, flaggedReason: 'Prototype flag: member-reported cover photo (mock review queue).' },
+};
+
+// ---- Group Charter & Council (member-visible; experience architecture) ----
+
+export const CHARTER_CLAUSE_SUGGESTIONS: { area: string; clauses: string[] }[] = [
+  {
+    area: 'Purpose & identity',
+    clauses: [
+      'We move together to stay consistent and accountable.',
+      'Every member belongs — all paces and levels are welcome.',
+    ],
+  },
+  {
+    area: 'Member conduct',
+    clauses: [
+      'Log honestly — our shared totals only work with real efforts.',
+      'Encourage others with cheers; no shaming slow days.',
+    ],
+  },
+  {
+    area: 'Challenge creation',
+    clauses: [
+      'Any member may create a Challenge unless the group agrees otherwise.',
+      'Creation rules can be limited to stewards by group agreement.',
+    ],
+  },
+  {
+    area: 'Stewardship',
+    clauses: [
+      'Stewards keep the group welcoming and the schedule running.',
+      'Stewards review flagged content and join requests promptly.',
+    ],
+  },
+  {
+    area: 'Participation',
+    clauses: [
+      'Join only the Challenges you want — being in the group never auto-joins you.',
+      'Finish what you start where you can; life happens when it happens.',
+    ],
+  },
+  {
+    area: 'Community standards',
+    clauses: [
+      'Report problems to a steward instead of arguing in the feed.',
+      'Photos and notes stay kind and safe for everyone.',
+    ],
+  },
+];
+
+export const GROUP_CHARTERS: Record<string, GroupCharter> = {
+  'grp-nairobi-movers': {
+    version: 'v2 · active',
+    state: 'active',
+    clauses: [
+      'We move together to stay consistent and accountable.',
+      'Log honestly — our shared totals only work with real efforts.',
+      'Any member may create a Challenge unless the group agrees otherwise.',
+      'Join only the Challenges you want — being in the group never auto-joins you.',
+    ],
+    updated: 'Aug 2026',
+  },
+  'grp-kilimani-endurance': {
+    version: 'v1 · active',
+    state: 'active',
+    clauses: [
+      'Structured training with posted start times — arrive ready.',
+      'Challenge creation is steward-curated by group agreement.',
+      'Safety first on open roads.',
+    ],
+    updated: 'Jul 2026',
+  },
+  'grp-zenith-mind': {
+    version: 'v1 · draft',
+    state: 'draft',
+    clauses: ['Quiet presence and mindful communication.'],
+    updated: 'Sep 2026 (draft)',
+  },
+};
+
+export const GROUP_COUNCILS: Record<string, GroupCouncil> = {
+  'grp-nairobi-movers': {
+    enabled: true,
+    kind: 'advisory',
+    purpose: 'Advise stewards on the monthly schedule and welcome new members.',
+    members: ['Wanjiku Kimani (steward rep)', 'Kipchoge Ngetich', 'Sarah Chen'],
+    stewardRep: 'Wanjiku Kimani',
+  },
+  'grp-kilimani-endurance': {
+    enabled: true,
+    kind: 'challenge_committee',
+    purpose: 'Curate the race calendar and review interval-night safety.',
+    members: ['Kipchoge Ngetich (steward rep)', 'Eric Mutua'],
+    stewardRep: 'Kipchoge Ngetich',
+  },
+  'grp-zenith-mind': { enabled: false, members: [] },
 };
 
 export const EXTRA_CHALLENGES: Challenge[] = [

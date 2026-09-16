@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Challenge,
   ChallengeType,
+  ChallengeSupportConfig,
+  ChallengeTemplateDraft,
   Group,
   Member,
   MetricType,
@@ -10,6 +12,7 @@ import {
 import { CANONICAL_ACTIVITIES } from '../../data/canonicalActivities';
 import { challengeTypeLabel, friendlyTimezone } from '../../utils/memberDisplay';
 import { CHALLENGE_TEMPLATES } from '../../data/mockData';
+import { MemberTemplateEntry } from '../operator/OperatorTemplates';
 import {
   X,
   Users,
@@ -41,6 +44,11 @@ interface CreateChallengeWizardProps {
   currentMember: Member;
   onCreateChallenge: (newChallenge: Challenge) => void;
   initialTemplateId?: string;
+  // Template Authoring mode: same flow, ends in a Draft Template (never a
+  // live Challenge). Used by the operator console.
+  authoringMode?: 'challenge' | 'template';
+  onCreateTemplate?: (draft: ChallengeTemplateDraft) => void;
+  templates?: MemberTemplateEntry[];
 }
 
 export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
@@ -51,7 +59,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   currentMember,
   onCreateChallenge,
   initialTemplateId,
+  authoringMode = 'challenge',
+  onCreateTemplate,
+  templates,
 }) => {
+  const templateSource = templates ?? CHALLENGE_TEMPLATES;
+  const isTemplateMode = authoringMode === 'template';
   // Step sequence:
   // 1: Choose Archetype & Template (Together, Race, Streak)
   // 2: Host Group & Story
@@ -85,11 +98,25 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
   // Explicit affirmative creator participation (Product Truth: Creator participation must NOT be assumed)
   const [creatorWillJoin, setCreatorWillJoin] = useState<boolean>(false);
+  // Optional Support Tiizi offer (never a requirement; never scored)
+  const [supportEnabled, setSupportEnabled] = useState(false);
+  const [supportAmounts, setSupportAmounts] = useState<number[]>([1, 2, 5]);
+  const [supportCustom, setSupportCustom] = useState(true);
+  const [supportWhen, setSupportWhen] = useState<'join' | 'during' | 'both'>('both');
+  // Template authoring extras
+  const [tplEditableFields, setTplEditableFields] = useState('target, duration, group, cause');
+  const [tplVisibility, setTplVisibility] = useState<'members' | 'hidden'>('members');
+  const [tplLocales, setTplLocales] = useState('en ready · sw ready');
   const appliedTemplate = useRef<string | null>(null);
+
+  const buildSupportConfig = (): ChallengeSupportConfig | undefined =>
+    supportEnabled
+      ? { enabled: true, suggestedAmounts: supportAmounts, allowCustom: supportCustom, offerWhen: supportWhen, currency: '$' }
+      : undefined;
 
   // Apply template helper (function declaration so the mount effect below can call it)
   function handleApplyTemplate(tplId: string) {
-    const tpl = CHALLENGE_TEMPLATES.find((t) => t.id === tplId);
+    const tpl = templateSource.find((t) => t.id === tplId);
     if (!tpl) return;
 
     setChallengeType(tpl.type);
@@ -230,6 +257,39 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   };
 
   const handleFinish = () => {
+    const supportTiizi = buildSupportConfig();
+    if (isTemplateMode) {
+      // Template Authoring: same setup, ends as a Draft Template — never a
+      // live Challenge. Members pick their group when they use it.
+      const primaryCfg = activityConfigs[selectedActivityIds[0]] || { metric: 'Distance' as MetricType, unit: 'km', targetValue: 100 };
+      const draft: ChallengeTemplateDraft = {
+        id: `tpl-${Date.now()}`,
+        name: title.trim() || 'Untitled Template',
+        type: challengeType,
+        description: description.trim() || 'Template description (mock).',
+        durationDays,
+        ...(challengeType === 'streak'
+          ? {
+              activityIds: [...selectedActivityIds],
+              metrics: selectedActivityIds.map((id) => activityConfigs[id]?.metric ?? 'Duration'),
+              units: selectedActivityIds.map((id) => activityConfigs[id]?.unit ?? 'min'),
+              targetValues: selectedActivityIds.map((id) => Number(activityConfigs[id]?.targetValue ?? 15)),
+            }
+          : {
+              activityId: selectedActivityIds[0],
+              metric: primaryCfg.metric,
+              unit: primaryCfg.unit,
+              targetValue: Number(primaryCfg.targetValue),
+            }),
+        editableFields: tplEditableFields,
+        visibility: tplVisibility,
+        locales: tplLocales,
+        supportTiizi,
+      };
+      onCreateTemplate?.(draft);
+      onClose();
+      return;
+    }
     const finalActivities: ChallengeActivityConfig[] = selectedActivityIds.map((id) => {
       const cfg = activityConfigs[id];
       const act = CANONICAL_ACTIVITIES.find((a) => a.id === id);
@@ -294,6 +354,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
       isCause,
       causeName: isCause ? causeName : undefined,
       participants: initialParticipants,
+      supportTiizi,
       collectiveProgress:
         challengeType === 'collective'
           ? {
@@ -352,8 +413,11 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               </span>
             </div>
             <h2 className="text-xl font-extrabold text-zinc-900 mt-1">
-              Create a Group Challenge
+              {isTemplateMode ? 'Create a Challenge Template' : 'Create a Group Challenge'}
             </h2>
+            {isTemplateMode && (
+              <p className="text-[11px] text-zinc-500 mt-0.5">Template authoring (mock) — same setup flow. Finishes as a Draft Template, never a live Challenge.</p>
+            )}
           </div>
 
           <button
@@ -491,7 +555,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {CHALLENGE_TEMPLATES.map((tpl) => (
+                  {templateSource.map((tpl) => (
                     <button
                       key={tpl.id}
                       type="button"
@@ -531,7 +595,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </p>
               </div>
 
-              {/* Host Group Selection */}
+              {/* Host Group Selection (host-neutral in template mode) */}
+              {isTemplateMode ? (
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs text-zinc-600">
+                  Templates stay host-neutral — members choose their own group when they use this template. No host is stored on the template.
+                </div>
+              ) : (
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                   Host Community Group
@@ -571,6 +640,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   })}
                 </div>
               </div>
+              )}
 
               {/* Title */}
               <div>
@@ -1034,6 +1104,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               </div>
 
               {/* Will you take part? (creating doesn't join you automatically) */}
+              {!isTemplateMode && (
               <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2.5">
                 <div className="flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-amber-700 shrink-0" />
@@ -1072,6 +1143,60 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   </button>
                 </div>
               </div>
+              )}
+
+              {/* Optional Support Tiizi offer (never required, never scored) */}
+              <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-200 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-sky-950">Support Tiizi while taking part — optional</h4>
+                    <p className="text-[11px] text-sky-800">Optional — participation is never affected. Members can join and finish with $0. No guilt, no gating.</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button type="button" onClick={() => setSupportEnabled(false)} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${!supportEnabled ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Off</button>
+                    <button type="button" onClick={() => setSupportEnabled(true)} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${supportEnabled ? 'bg-sky-600 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>On</button>
+                  </div>
+                </div>
+                {supportEnabled && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] text-sky-900 font-bold">Suggested:</span>
+                      {[1, 2, 5, 10].map((a) => (
+                        <button key={a} type="button" onClick={() => setSupportAmounts((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a].sort((x, y) => x - y))} className={`px-2 py-1 text-[11px] font-bold rounded-lg border cursor-pointer ${supportAmounts.includes(a) ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-600 border-zinc-200'}`}>${a}</button>
+                      ))}
+                      <label className="flex items-center gap-1 text-[11px] text-sky-900 ml-1 cursor-pointer">
+                        <input type="checkbox" checked={supportCustom} onChange={(e) => setSupportCustom(e.target.checked)} className="accent-sky-600" /> Custom amount allowed
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] text-sky-900 font-bold">Offer:</span>
+                      {(['join', 'during', 'both'] as const).map((w) => (
+                        <button key={w} type="button" onClick={() => setSupportWhen(w)} className={`px-2 py-1 text-[11px] font-bold rounded-lg border capitalize cursor-pointer ${supportWhen === w ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-600 border-zinc-200'}`}>{w === 'join' ? 'On join' : w === 'during' ? 'During' : 'Both'}</button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-sky-800">Belongs to Support Tiizi, not challenge scoring. Separate from any Community Cause.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Template-only settings */}
+              {isTemplateMode && (
+                <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs">
+                  <h4 className="font-bold text-zinc-900">Template settings (mock)</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label className="block"><span className="text-[10px] uppercase font-bold text-zinc-400">Allowed editable fields</span>
+                      <input value={tplEditableFields} onChange={(e) => setTplEditableFields(e.target.value)} className="mt-0.5 w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg" /></label>
+                    <label className="block"><span className="text-[10px] uppercase font-bold text-zinc-400">Localisation readiness</span>
+                      <input value={tplLocales} onChange={(e) => setTplLocales(e.target.value)} className="mt-0.5 w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg" /></label>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-zinc-500">Visibility:</span>
+                    <button type="button" onClick={() => setTplVisibility('members')} className={`px-2 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${tplVisibility === 'members' ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Members</button>
+                    <button type="button" onClick={() => setTplVisibility('hidden')} className={`px-2 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${tplVisibility === 'hidden' ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Hidden</button>
+                  </div>
+                  <p className="text-[10px] text-zinc-500">Finishes as a Draft Template — publish it from Templates before members can use it.</p>
+                </div>
+              )}
 
               {/* What counts */}
               <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 text-xs space-y-2">
@@ -1134,7 +1259,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
             >
               <Check className="w-4 h-4" />
-              <span>Launch Challenge</span>
+              <span>{isTemplateMode ? 'Save Draft Template' : 'Launch Challenge'}</span>
             </button>
           )}
         </div>

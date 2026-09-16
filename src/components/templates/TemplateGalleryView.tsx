@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import { CHALLENGE_TEMPLATES } from '../../data/mockData';
-import { OPERATOR_TEMPLATES } from '../../data/operatorMockData';
 import { challengeTypeLabel } from '../../utils/memberDisplay';
+import { ChallengeType } from '../../types';
 import { Sparkles, Eye, ArrowRight } from 'lucide-react';
 
-export const TemplateGalleryView: React.FC<{ onUseTemplate: (tplId: string) => void }> = ({ onUseTemplate }) => {
+interface GalleryTemplate {
+  id: string;
+  name: string;
+  type: ChallengeType;
+  description: string;
+  durationDays: number;
+}
+
+export const TemplateGalleryView: React.FC<{ onUseTemplate: (tplId: string) => void; templates?: GalleryTemplate[] }> = ({ onUseTemplate, templates }) => {
+  // Members only ever see published templates — drafts and retired templates
+  // are managed in the operator console and stay hidden here.
+  const visible = templates ?? CHALLENGE_TEMPLATES;
   const [previewId, setPreviewId] = useState<string | null>(null);
-  const preview = CHALLENGE_TEMPLATES.find((t) => t.id === previewId);
-  const statusOf = (id: string) => OPERATOR_TEMPLATES.find((t) => t.id === id)?.status ?? 'published';
+  const preview = visible.find((t) => t.id === previewId);
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
       <div className="border-b border-zinc-200 pb-5">
@@ -15,13 +25,18 @@ export const TemplateGalleryView: React.FC<{ onUseTemplate: (tplId: string) => v
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 mt-1">Challenge Templates</h1>
         <p className="text-sm text-zinc-600 mt-1">Browse, preview, then create through the same guided Wizard. Every field stays editable before launch.</p>
       </div>
+      {visible.length === 0 && (
+        <div className="bg-white rounded-2xl border border-zinc-200 p-10 text-center max-w-md mx-auto">
+          <h3 className="text-base font-bold text-zinc-900">No templates right now</h3>
+          <p className="text-xs text-zinc-500 mt-1">New starting points appear here once the Tiizi team publishes them.</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {CHALLENGE_TEMPLATES.map((tpl) => (
+        {visible.map((tpl) => (
           <div key={tpl.id} className="bg-white rounded-2xl border border-zinc-200 p-4 flex flex-col justify-between hover:border-orange-300 transition-colors">
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] font-bold uppercase text-orange-600">{challengeTypeLabel(tpl.type)}</span>
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${statusOf(tpl.id) === 'published' ? 'bg-emerald-100 text-emerald-800' : statusOf(tpl.id) === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-zinc-100 text-zinc-600'}`}>{statusOf(tpl.id)}</span>
               </div>
               <h3 className="font-extrabold text-sm text-zinc-900">{tpl.name}</h3>
               <p className="text-xs text-zinc-600 mt-1 line-clamp-3">{tpl.description}</p>
