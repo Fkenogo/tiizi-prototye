@@ -23,6 +23,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { KudoButton } from '../common/KudoButton';
+import { challengeTypeLabel } from '../../utils/memberDisplay';
 
 interface TodayViewProps {
   currentMember: Member;
@@ -84,9 +85,6 @@ export const TodayView: React.FC<TodayViewProps> = ({
   const isMissedYesterday = streakParticipant?.missedYesterday;
   const todayDone = streakParticipant?.todayCompleted;
 
-  // Determine governing timezone for the active streak challenge
-  const streakTimezone = streakChallenge?.timezone || 'Africa/Nairobi (EAT)';
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-7">
       {/* 1. Contextual Greeting & Daily Time Horizon */}
@@ -94,13 +92,13 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <div>
           <div className="flex items-center gap-2 text-[11px] font-bold text-orange-600 uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5" />
-            <span>Tuesday, Sep 15 • {streakTimezone}</span>
+            <span>Tuesday, Sep 15</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 mt-1 tracking-tight">
             What to do today, {currentMember.name.split(' ')[0]}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
-            Your daily requirements and community commitments ordered by human urgency.
+            What you need to complete today, ordered by what matters most.
           </p>
         </div>
 
@@ -187,35 +185,35 @@ export const TodayView: React.FC<TodayViewProps> = ({
               </div>
             </div>
 
-            {/* Missed Day Non-Restoration & Non-Punitive Reset (Product Truth: No fake grace days) */}
+            {/* Fresh start after a missed day — totals preserved */}
             {isMissedYesterday && (
               <div className="mt-4 p-3.5 bg-amber-50/90 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
-                  <span className="font-bold">Governed Streak Reset: </span>
-                  Yesterday's daily requirement was missed. In accordance with strict consistency governance, your Current Streak reset to 0 (no retroactive repairs or grace days).
-                  However, your <strong className="text-zinc-900">{streakParticipant.daysCompleted} Total Days Completed</strong> and{' '}
-                  <strong className="text-zinc-900">{streakParticipant.bestStreak}-Day Best Record</strong> are permanently preserved.
-                  Logging today's requirements will ignite your next consecutive streak!
+                  <span className="font-bold">Your streak restarted. </span>
+                  Yesterday was missed, so your current streak restarted at 0.
+                  Your completed days and best streak are still saved: <strong className="text-zinc-900">{streakParticipant.daysCompleted} days completed</strong> and{' '}
+                  <strong className="text-zinc-900">best streak of {streakParticipant.bestStreak} days</strong>.
+                  Complete these before today ends to start your next streak!
                 </div>
               </div>
             )}
           </div>
 
-          {/* Today's Requirements Checklist with Timezone-Aware Boundary */}
+          {/* Today's activities checklist */}
           <div className="p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">
-                  Today's Governed Requirements
+                  Today's activities
                 </h3>
                 <p className="text-[11px] text-zinc-500">
-                  Complete and log before the Challenge day concludes in {streakTimezone}.
+                  What you need to complete today. Complete these before today ends.
                 </p>
               </div>
               <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200/60 flex items-center gap-1.5 self-start sm:self-auto">
                 <Clock className="w-3.5 h-3.5 text-orange-600" />
-                <span>8h 24m remaining in {streakTimezone.split(' ')[0]}</span>
+                <span>8h 24m remaining today</span>
               </span>
             </div>
 
@@ -280,7 +278,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
               Active Challenge Progress
             </h2>
             <p className="text-xs text-zinc-500">
-              Your ongoing contributions to collective and competitive goals
+              Your ongoing Together and Race challenges
             </p>
           </div>
           <button
@@ -300,7 +298,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded-md">
-                      Together (Collective)
+                      Together
                     </span>
                     <span className="text-[11px] text-zinc-500 font-medium">
                       {collectiveChallenge.groupName}
@@ -325,7 +323,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-100">
                   <div className="flex items-baseline justify-between mb-1.5">
                     <span className="text-xs font-bold text-zinc-700">
-                      Collective Goal Progress
+                      Group total
                     </span>
                     <span className="text-xs font-extrabold text-orange-600 tabular-nums">
                       {collectiveChallenge.collectiveProgress?.totalAccumulated} / {collectiveChallenge.targetValue} {collectiveChallenge.targetUnit}
@@ -382,14 +380,14 @@ export const TodayView: React.FC<TodayViewProps> = ({
             </div>
           )}
 
-          {/* Competitive Race Card (Governed finishing positions, no winner-takes-all) */}
+          {/* Race card (shared finishing spots when members tie) */}
           {competitiveChallenge && (
             <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between hover:border-zinc-300 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider bg-rose-100 px-2 py-0.5 rounded-md">
-                      Race (Competitive)
+                      Race
                     </span>
                     <span className="text-[11px] text-zinc-500 font-medium">
                       {competitiveChallenge.groupName}
@@ -407,7 +405,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   {competitiveChallenge.title}
                 </h3>
                 <p className="text-xs text-zinc-600 mt-1 line-clamp-2 leading-relaxed">
-                  Participants strive to complete 100 km before the window ends. Standard competition finishing positions (1, 2, 2, 4) with shared ties.
+                  Everyone who finishes is ranked in order — members who tie share a spot.
                 </p>
 
                 {/* Race Status Snapshot */}
@@ -490,7 +488,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
                     <span>{ch.groupName}</span>
-                    <span className="text-orange-600 capitalize">{ch.type} Challenge</span>
+                    <span className="text-orange-600 capitalize">{challengeTypeLabel(ch.type)} Challenge</span>
                   </div>
                   <h3
                     onClick={() => onSelectChallenge(ch.id)}

@@ -120,7 +120,7 @@ export const GroupListView: React.FC<GroupListViewProps> = ({
                 {group.healthState && group.healthState !== 'healthy' && (
                   <div className="absolute bottom-3 right-3">
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs ${group.healthState === 'restricted' ? 'bg-amber-500 text-white' : 'bg-rose-600 text-white'}`}>
-                      {group.healthState === 'restricted' ? 'Restricted' : 'Under review'}
+                      {group.healthState === 'restricted' ? 'Restricted' : 'Being reviewed'}
                     </span>
                   </div>
                 )}

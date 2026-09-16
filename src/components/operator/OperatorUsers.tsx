@@ -40,7 +40,8 @@ export const OperatorUsers: React.FC = () => {
             <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-xl object-cover" />
             <div><h2 className="font-extrabold text-sm">{user.name}</h2><p className="text-[11px] text-zinc-500">{user.handle} · {user.role} · {user.state}</p></div>
           </div>
-          {user.issue && <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-900"><strong>Issue requiring support (mock):</strong> {user.issue}</div>}
+          {user.issue && <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-900"><strong>Needs attention (mock):</strong> {user.issue}</div>}
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Inspect</p>
           <dl className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 bg-zinc-50 rounded-xl"><dt className="text-[10px] uppercase font-bold text-zinc-400">Groups</dt><dd className="font-bold">{user.groups}</dd></div>
             <div className="p-2.5 bg-zinc-50 rounded-xl"><dt className="text-[10px] uppercase font-bold text-zinc-400">Challenges</dt><dd className="font-bold">{user.challenges}</dd></div>
@@ -51,6 +52,7 @@ export const OperatorUsers: React.FC = () => {
             <p><strong>Support view (mock):</strong> recent errors — none for actives; suspended shows accuracy flags.</p>
             <p><strong>Access:</strong> {user.role} — see Access &amp; Roles for scope. No impersonation control rendered.</p>
           </div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Act (mock — confirm → audit trail)</p>
           <div className="flex gap-2">
             <button title="Intent: restrict access pending review. Requires confirm; writes suspend event to Audit Log; permission-dependent." className="px-3 py-1.5 bg-white border border-zinc-200 text-xs font-bold rounded-lg cursor-pointer">Suspend (mock · confirm → audit)</button>
             <button title="Intent: restore access after review. Requires confirm; writes reactivate event to Audit Log; permission-dependent." className="px-3 py-1.5 bg-white border border-zinc-200 text-xs font-bold rounded-lg cursor-pointer">Reactivate (mock · confirm → audit)</button>

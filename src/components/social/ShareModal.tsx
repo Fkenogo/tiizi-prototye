@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Challenge, Member } from '../../types';
+import { challengeTypeLabel } from '../../utils/memberDisplay';
 import { X, Flame, Award, CheckCircle2, Share2, Copy, Check } from 'lucide-react';
 
 interface ShareModalProps {
@@ -62,7 +63,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                   </span>
                 </div>
                 <span className="text-[10px] uppercase font-bold text-orange-400 bg-orange-950/70 border border-orange-500/30 px-2 py-0.5 rounded-full">
-                  {challenge.type} challenge
+                  {challengeTypeLabel(challenge.type)} challenge
                 </span>
               </div>
 
@@ -80,10 +81,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 <div>
                   <span className="text-[10px] text-zinc-300 block uppercase">
                     {challenge.type === 'collective'
-                      ? 'Collective Progress'
+                      ? 'Group total'
                       : challenge.type === 'competitive'
-                      ? 'Finish Line'
-                      : 'Streak Consistency'}
+                      ? 'Finish line'
+                      : 'Streak'}
                   </span>
                   <span className="text-base font-extrabold text-white">
                     {challenge.type === 'collective'

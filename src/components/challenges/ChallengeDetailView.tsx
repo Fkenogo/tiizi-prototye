@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Challenge, Member, ActivitySubmission } from '../../types';
 import { CANONICAL_ACTIVITIES } from '../../data/canonicalActivities';
+import { friendlyTimezone } from '../../utils/memberDisplay';
 import {
   Users,
   Flame,
@@ -102,7 +103,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           {isCompleted && onRunAgain && (
             <button
               onClick={() => onRunAgain(challenge)}
-              title="Creates a new challenge with the same configuration. Starts with 0 participants — previous members rejoin affirmatively."
+              title="Creates a new challenge with the same setup. Starts with 0 participants — previous members rejoin affirmatively."
               className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -125,15 +126,15 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2">
             <span className="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-orange-500 text-white shadow-xs">
               {challenge.type === 'collective'
-                ? 'Collective Challenge'
+                ? 'Together Challenge'
                 : challenge.type === 'competitive'
-                ? 'Competitive Race'
-                : 'Daily Streak Challenge'}
+                ? 'Race'
+                : 'Daily Streak'}
             </span>
 
             <span className="text-xs font-semibold text-white bg-black/60 backdrop-blur-xs px-3 py-1 rounded-full flex items-center gap-1.5">
               <Globe className="w-3.5 h-3.5 text-orange-400" />
-              <span>{challenge.timezone}</span>
+              <span>{friendlyTimezone(challenge.timezone)}</span>
             </span>
           </div>
 
@@ -181,7 +182,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
               ) : (
                 <span className="text-xs font-bold text-zinc-700 bg-zinc-200/90 border border-zinc-300 px-3.5 py-2 rounded-xl flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                  <span>Sealed Historical Challenge</span>
+                  <span>Finished — saved</span>
                 </span>
               )
             ) : (
@@ -212,26 +213,26 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
         {challenge.status === 'closed' && (
           <div className="bg-zinc-100 border-b border-zinc-200 px-5 sm:px-6 py-3 text-xs text-zinc-700 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
-            <span><strong>Closed{challenge.isFull ? ' — capacity reached' : ''}:</strong> this window is no longer joinable{challenge.capacity ? ` (${challenge.capacity}/${challenge.capacity} prototype capacity)` : ''}. {challenge.finalized ? 'Results are finalized.' : ''}</span>
+            <span><strong>Closed{challenge.isFull ? ' — capacity reached' : ''}:</strong> you can't join this one any more{challenge.capacity ? ` (${challenge.capacity}/${challenge.capacity} spots filled)` : ''}. {challenge.finalized ? 'The results are in.' : ''}</span>
           </div>
         )}
         {challenge.isFlagged && (
           <div className="bg-amber-50 border-b border-amber-200 px-5 sm:px-6 py-3 text-xs text-amber-900 flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <span><strong>Under mock review:</strong> {challenge.flaggedReason || 'flagged for operator review (prototype).'} Member view stays readable; actions may be limited.</span>
+            <span><strong>Being reviewed:</strong> {challenge.flaggedReason || 'The Tiizi team is checking this challenge (sample).'} You can still look around; some actions may be limited.</span>
           </div>
         )}
         {challenge.finalized && challenge.status !== 'completed' && (
-          <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3 text-xs"><strong className="text-amber-400">Finalized:</strong> terminal state — record locked, read-only.</div>
+          <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3 text-xs"><strong className="text-amber-400">Results are in:</strong> this record is read-only.</div>
         )}
 
-        {/* Celebratory Finalized Historic Notice */}
+        {/* Finished challenge notice */}
         {isCompleted && (
           <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800">
             <div className="flex items-center gap-2.5 text-xs">
               <Award className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
-                <strong className="text-amber-400">Historical Archive:</strong> This challenge window has concluded. All participant milestones are finalized and permanently preserved.
+                <strong className="text-amber-400">Finished:</strong> This challenge has ended. Everyone's results are saved and can't be changed.
                 <span className="block text-zinc-300 mt-1 font-normal">Run Again creates a new challenge with the same setup and <strong className="text-white">0 participants</strong> — previous members are not carried over. Rejoin or reinvite affirmatively.</span>
               </span>
             </div>
@@ -311,10 +312,10 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
             <div>
               <h2 id="collective-heading" className="text-lg font-extrabold text-zinc-900">
-                Collective Target Progress
+                Group total
               </h2>
               <p className="text-xs text-zinc-500">
-                Individual contributions accumulate toward one shared community outcome.
+                Everyone's contributions add up to one shared result.
               </p>
             </div>
 
@@ -434,10 +435,10 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-100 pb-4">
             <div>
               <h2 id="competitive-heading" className="text-lg font-extrabold text-zinc-900">
-                Podium & Standings (Qualifying 100 KM)
+                Race results
               </h2>
               <p className="text-xs text-zinc-500">
-                Governed standard competition ranking (1, 2, 2, 4). Challenge window remains open until time expires.
+                Everyone who finishes is ranked in order — tied members share a spot. The challenge stays open until the end date.
               </p>
             </div>
 
@@ -454,7 +455,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
                 <Award className="w-4 h-4 text-amber-500" />
-                <span>Qualifying Finishers (Standard Competition Standing: 1, 2, 2, 4)</span>
+                <span>Finishers</span>
               </h3>
               <span className="text-[11px] text-zinc-500 font-medium">Shared ties preserve natural rank</span>
             </div>
@@ -473,7 +474,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
                           #{p.rank}
                         </span>
                         <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Target Reached ({challenge.targetValue} {challenge.targetUnit})
+                          Finished ({challenge.targetValue} {challenge.targetUnit})
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5 mt-2">
@@ -496,7 +497,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           {/* Active Participants In-Progress */}
           <div className="space-y-3 pt-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Active Participants In-Progress (No rank until 100k reached)
+              Still going (ranked once they finish)
             </h3>
 
             <div className="divide-y divide-zinc-100">
@@ -562,7 +563,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
                 Today's Daily Consistency
               </h2>
               <p className="text-xs text-zinc-500">
-                Daily requirements must be completed before midnight EAT. A missed day resets current streak; cumulative days completed remains preserved.
+                Complete these before today ends. If you miss a day, your streak restarts at 0 — your completed days and best streak are still saved.
               </p>
             </div>
 
@@ -653,7 +654,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           {/* Group Consistency Roster (No competitive leaderboard per brief) */}
           <div className="space-y-3 pt-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Group Consistency Roster
+              Everyone's streaks
             </h3>
             <div className="divide-y divide-zinc-100">
               {sortedParticipants.map((p) => {
@@ -711,10 +712,10 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
         </section>
       )}
 
-      {/* 3. Verified Challenge Activity Stream */}
+      {/* 3. Recent activity */}
       <section aria-labelledby="activity-stream-heading" className="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs space-y-4">
         <h2 id="activity-stream-heading" className="text-base font-extrabold text-zinc-900">
-          Recent Challenge Submissions
+          Recent activity
         </h2>
 
         <div className="divide-y divide-zinc-100">

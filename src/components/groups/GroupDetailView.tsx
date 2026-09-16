@@ -71,8 +71,8 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             {group.healthState === 'restricted'
-              ? <><strong>Restricted group (mock rule):</strong> this group restricts challenge creation to stewards — the exception to the open-by-default rule{group.pendingRequests ? ` · ${group.pendingRequests} join requests pending review` : ''}. Contact {groupStewards[0]?.name || 'a steward'} to request access.</>
-              : <><strong>Under mock review:</strong> {group.flaggedReason || 'flagged for operator review (prototype).'} Roster and challenges stay readable.</>}
+              ? <><strong>Only Group stewards can create Challenges in this Group.</strong> Contact {groupStewards[0]?.name || 'a steward'} to ask about creating one.{group.pendingRequests ? ` ${group.pendingRequests} join requests are waiting for review.` : ''}</>
+              : <><strong>Being reviewed:</strong> {group.flaggedReason || 'The Tiizi team is checking this group (sample).'} Roster and challenges stay readable.</>}
           </span>
         </div>
       )}
@@ -156,7 +156,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
               {isJoined ? '✓ Member of Group' : 'Join Group'}
             </button>
 
-            {/* Governed Permission Check: Open Group vs Steward-Led Group */}
+            {/* Who can create: everyone unless this group limits it */}
             {group.allowMemberCreation !== false || isSteward ? (
               <button
                 onClick={onOpenCreateChallenge}
@@ -177,12 +177,12 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Affirmative Participation Callout Banner */}
+        {/* What joining means */}
         <div className="bg-amber-50/70 border-b border-amber-200/60 px-5 py-2.5 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-amber-950 font-medium">
             <Shield className="w-4 h-4 text-amber-700 shrink-0" />
             <span>
-              <strong>Governed Principle:</strong> Group Membership ≠ Challenge Participation. Being in {group.name} provides community eligibility; you choose which challenges to affirmatively join.
+              <strong>Good to know:</strong> being in {group.name} doesn't automatically join you to its Challenges — you choose which ones to join.
             </span>
           </div>
         </div>
@@ -231,7 +231,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
               Active & Upcoming Group Challenges
             </h2>
             <span className="text-xs text-zinc-500">
-              Note: Being in this Group does not auto-enroll you. Join challenges affirmatively!
+              Being in this Group doesn't join you automatically — join the Challenges you want!
             </span>
           </div>
 

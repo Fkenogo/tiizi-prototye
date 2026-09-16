@@ -58,7 +58,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
             Group Challenges
           </h1>
           <p className="text-sm text-zinc-600 mt-1">
-            Structured collective commitments, competitive endurance races, and daily habit streaks.
+            Shared group totals, friendly races, and daily habits.
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
                 : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
             }`}
           >
-            Together (Collective)
+            Together
           </button>
           <button
             onClick={() => setTypeFilter('competitive')}
@@ -132,7 +132,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
                 : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
             }`}
           >
-            Race (Competitive)
+            Race
           </button>
           <button
             onClick={() => setTypeFilter('streak')}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Challenge, Member, MetricType, ActivitySubmission } from '../../types';
 import { CANONICAL_ACTIVITIES } from '../../data/canonicalActivities';
+import { challengeTypeLabel } from '../../utils/memberDisplay';
 import {
   X,
   CheckCircle2,
@@ -114,7 +115,7 @@ export const LogActivityModal: React.FC<LogActivityModalProps> = ({
       note: note.trim() || undefined,
     };
 
-    // Calculate Engine updates
+    // Apply progress updates
     const updatedChallenge = { ...currentChallenge };
     const pIndex = updatedChallenge.participants.findIndex(
       (p) => p.memberId === currentMember.id
@@ -144,7 +145,7 @@ export const LogActivityModal: React.FC<LogActivityModalProps> = ({
         };
 
         if (totalAcc >= updatedChallenge.targetValue) {
-          feedbackHeadline = '🎉 Collective Milestone Achieved!';
+          feedbackHeadline = '🎉 Group goal reached!';
           feedbackDetail = `Your ${value} ${unit} helped the group reach ${totalAcc} ${unit} (${percent.toFixed(1)}%)! Target Exceeded!`;
         } else {
           feedbackHeadline = 'Contribution Applied to Group Target';
@@ -190,7 +191,7 @@ export const LogActivityModal: React.FC<LogActivityModalProps> = ({
           feedbackDetail = `All daily requirements satisfied. Your streak continues: ${participant.currentStreak} consecutive days!`;
         } else {
           feedbackHeadline = 'Requirement Logged';
-          feedbackDetail = `${activityName} marked complete for today. Finish remaining items before 23:59 EAT to secure your day!`;
+          feedbackDetail = `${activityName} marked complete for today. Finish remaining items before today ends to keep your streak going!`;
         }
       }
 
@@ -220,7 +221,7 @@ export const LogActivityModal: React.FC<LogActivityModalProps> = ({
               Log Activity Submission
             </span>
             <h2 className="text-base font-extrabold text-zinc-900 mt-0.5">
-              Record Governed Progress
+              Record your progress
             </h2>
           </div>
 
@@ -259,7 +260,7 @@ export const LogActivityModal: React.FC<LogActivityModalProps> = ({
               >
                 {activeChallenges.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.title} ({c.type.toUpperCase()})
+                    {c.title} ({challengeTypeLabel(c.type)})
                   </option>
                 ))}
               </select>

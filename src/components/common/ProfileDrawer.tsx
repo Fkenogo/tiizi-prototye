@@ -101,7 +101,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               {currentMember.bio}
             </p>
 
-            {/* Governed Stats */}
+            {/* Member stats */}
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-3 bg-orange-50/60 rounded-xl border border-orange-100">
                 <span className="text-lg font-black text-orange-600 block">
@@ -129,18 +129,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               </div>
             </div>
 
-            {/* Policy-qualified Platform Recognition (records, not credentials; distinct from community Kudos) */}
+            {/* Recognition (member wording stays plain; the rules live in the reference layer) */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
                   <Award className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Platform Recognition</span>
+                  <span>Recognition</span>
                 </h4>
                 <span className="text-[10px] font-semibold text-zinc-400">
-                  Policy-qualified records
+                  Earned achievements
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-500 leading-relaxed">Not automatic: only Derived Truth that meets Platform Policy is recorded here. Kudos from peers appear in the community feed, not here.</p>
+              <p className="text-[10px] text-zinc-500 leading-relaxed">Earned after completing challenges. Cheers from friends (Kudos) appear in the feed, not here.</p>
 
               {currentMember.recognitions && currentMember.recognitions.length > 0 ? (
                 <div className="space-y-2">
@@ -167,7 +167,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 </div>
               ) : (
                 <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center text-xs text-zinc-500">
-                  No recognition records yet. Some governed outcomes may qualify under Tiizi policy — Kudos are separate peer encouragement.
+                  Nothing here yet. Finish a challenge and your achievements will appear here.
                 </div>
               )}
             </div>

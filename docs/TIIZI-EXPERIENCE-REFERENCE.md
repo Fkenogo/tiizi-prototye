@@ -62,3 +62,8 @@ Members: active/suspended/invited/inactive. Groups: healthy/restricted/flagged. 
 
 - `npm run build` (vite) + `npm run lint` (tsc --noEmit) should pass; regressions fixed (e.g. missing Lock import).
 - Preview routes (member tabs): Today, Challenges (+ detail incl. upcoming/closed/flagged), Groups (+ restricted/flagged detail), Activity Guide, Onboarding, Templates, Support, Profile & settings. Operator: /console sections via surface switch (no router — state-driven prototype).
+
+## 8. Member language & time display
+
+- Member-facing UI is plain-language first: Together / Race / Streak; "Today's activities"; "Your streak restarted"; Recognition / Achievement wording. Internal governance/architecture vocabulary (governed, canonical, derived truth, policy-qualified, engine, lifecycle, configuration, immutable, reconciliation) stays behind the experience — in Reference Mode, the Assumptions Register, reference docs, and Operator technical views.
+- The governing Challenge timezone remains part of Challenge truth and calculation, but ordinary Member UI does not routinely expose it: times read "9:00 AM", "Today", "Ends today", "8h 24m remaining". Timezone is surfaced only where it prevents confusion (creation/settings, challenge "Time settings", cross-region views), in friendly form ("Nairobi time"). Full technical IDs (e.g. `Africa/Nairobi (EAT)`) are internal/reference data kept in mock data.

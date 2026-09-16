@@ -7,7 +7,7 @@ export const OperatorChallenges: React.FC = () => {
   return (
     <div className="space-y-4">
       <div><h1 className="text-xl sm:text-2xl font-black tracking-tight">Challenges</h1>
-      <p className="text-xs text-zinc-500">Inspect any challenge without becoming a participant. Terminal/finalized states are locked and explicit.</p></div>
+      <p className="text-xs text-zinc-500">Inspect: every row below (read-only — opening a challenge never joins it). Act: nothing here — challenges are never edited from this console. Attention: the Flags column.</p></div>
       <div className="flex gap-1 bg-white border border-zinc-200 p-1 rounded-xl w-fit">
         {(['all', 'active', 'upcoming', 'completed', 'closed'] as const).map((s) => (<button key={s} onClick={() => setStatus(s)} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg capitalize cursor-pointer ${status === s ? 'bg-zinc-900 text-white' : 'text-zinc-600'}`}>{s}</button>))}
       </div>

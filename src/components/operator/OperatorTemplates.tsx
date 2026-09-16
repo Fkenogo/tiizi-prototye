@@ -12,9 +12,13 @@ export const OperatorTemplates: React.FC<{ onUseTemplate: (id: string) => void }
           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded capitalize ${t.status === 'published' ? 'bg-emerald-100 text-emerald-800' : t.status === 'draft' ? 'bg-amber-100 text-amber-800' : 'bg-zinc-200 text-zinc-700'}`}>{t.status}</span></div>
           <p className="text-[11px] text-zinc-500 capitalize">{t.type} · {t.uses} uses · {t.locales} · updated {t.updated}</p>
           <p className="text-[11px] text-zinc-600">Editable fields: {t.editableFields}</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">View / build</p>
           <div className="flex flex-wrap gap-1.5 pt-1">
             <button onClick={() => onUseTemplate(t.id)} className="px-2.5 py-1.5 bg-orange-600 text-white text-[11px] font-bold rounded-lg cursor-pointer">Preview / build via Wizard</button>
-            <button title="Mock duplicate — no confirmation needed; creates a draft copy." className="px-2.5 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">Duplicate (mock)</button>
+            <button title="Mock duplicate — no confirmation needed; creates a draft copy." className="px-2.5 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">Duplicate (mock · view)</button>
+          </div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 pt-1">Act (mock — confirm → audit trail)</p>
+          <div className="flex flex-wrap gap-1.5 pt-1">
             <button title="Intent: make template available. Requires confirm; writes publish event to Audit Log; content-permission-dependent." className="px-2.5 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">Publish (mock · confirm → audit)</button>
             <button title="Intent: withdraw template. Requires confirm; writes retire event to Audit Log; content-permission-dependent." className="px-2.5 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">Retire (mock · confirm → audit)</button>
           </div>

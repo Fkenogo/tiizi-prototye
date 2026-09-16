@@ -1,5 +1,6 @@
 import React from 'react';
 import { Challenge, Member } from '../../types';
+import { friendlyTimezone } from '../../utils/memberDisplay';
 import {
   Users,
   Flame,
@@ -49,17 +50,17 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
     switch (challenge.type) {
       case 'collective':
         return {
-          label: 'Together • Collective',
+          label: 'Together',
           className: 'bg-amber-100 text-amber-900 border-amber-200',
         };
       case 'competitive':
         return {
-          label: 'Race • Competitive',
+          label: 'Race',
           className: 'bg-rose-100 text-rose-900 border-rose-200',
         };
       case 'streak':
         return {
-          label: 'Streak • Consistency',
+          label: 'Streak',
           className: 'bg-orange-100 text-orange-900 border-orange-200',
         };
     }
@@ -68,7 +69,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
   const getCardStateBadge = () => {
     if (isCompletedChallenge) {
       return {
-        label: 'Closed / Finalized',
+        label: 'Finished',
         className: 'bg-zinc-800 text-zinc-300 border-zinc-700',
         icon: Lock,
       };
@@ -150,7 +151,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-300 font-medium truncate mb-0.5">
             <span>{challenge.groupName}</span>
             <span>•</span>
-            <span>{challenge.timezone.split(' ')[0]}</span>
+            <span>{friendlyTimezone(challenge.timezone)}</span>
           </div>
           <h3 className="text-base font-extrabold text-white tracking-tight leading-snug group-hover:text-orange-400 transition-colors">
             {challenge.title}
@@ -227,7 +228,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
                   </div>
                 ) : (
                   <p className="text-[11px] text-zinc-500">
-                    Governed finishing positions (1, 2, 2, 4) with shared ties. Window closes on scheduled date.
+                    Everyone who finishes is ranked in order — tied members share a spot. The challenge stays open until the end date.
                   </p>
                 )}
               </div>
@@ -261,7 +262,7 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
                   </div>
                 ) : (
                   <p className="text-[11px] text-zinc-500">
-                    Every daily requirement must be logged before the day ends in {challenge.timezone.split(' ')[0]}.
+                    Log everything on your list before today ends.
                   </p>
                 )}
               </div>

@@ -17,7 +17,7 @@ export const OperatorOverview: React.FC = () => (
   <div className="space-y-5">
     <div>
       <h1 className="text-xl sm:text-2xl font-black tracking-tight">Who is using Tiizi? What needs attention?</h1>
-      <p className="text-xs text-zinc-500 mt-0.5">Operational cards only — no vanity metrics. Everything below is mock.</p>
+      <p className="text-xs text-zinc-500 mt-0.5">Operational cards only — no vanity metrics. Everything below is mock. Next step: open Review &amp; Attention for the full queue, or the Audit Log for what changed.</p>
     </div>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
       {CARDS.map((c) => (

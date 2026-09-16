@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
                       ? 'bg-white text-orange-600 font-bold shadow-xs'
                       : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50'
                   }`}
-                  title="Canonical Activity Guide"
+                  title="Activity Guide"
                 >
                   Activity Guide
                 </button>
@@ -129,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
                       ? 'bg-orange-50 text-orange-700 border-orange-200'
                       : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100 border-zinc-200'
                   }`}
-                  title="Explore Canonical Activity Knowledge"
+                  title="Explore the Activity Guide"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-zinc-500" />
                   <span>Activity Guide</span>

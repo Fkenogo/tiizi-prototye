@@ -7,7 +7,7 @@ const STATES: OnboardingPersonaState[] = [
   { id: 'no_group', title: 'No Group yet', description: 'You have an account but have not joined a community circle. Groups host every Challenge.', nextSteps: ['Browse Community Groups', 'Request to join or accept an invite', 'Then find a Challenge inside your Group'] },
   { id: 'in_group_no_challenge', title: 'In a Group, no Challenge', description: 'You belong to a circle but have no active commitment. Discovery is the next move.', nextSteps: ['Open your Group hub', 'Browse upcoming + active Challenges', 'Join one — logging unlocks after joining'] },
   { id: 'invited_group', title: 'Invited to a Group', description: 'Someone invited you. Review the circle, its stewards and rules, then accept.', nextSteps: ['Review the invitation (expires in 7 days in prototype)', 'Accept to enter the Group hub', 'Meet stewards and active Challenges'] },
-  { id: 'invited_challenge', title: 'Invited to a Challenge', description: 'Preview scope, schedule, timezone and requirements before committing.', nextSteps: ['Preview the Challenge (no logging yet)', 'Join affirmatively', 'Log your first activity on start day'] },
+  { id: 'invited_challenge', title: 'Invited to a Challenge', description: 'Preview what is involved, when it runs, and what you will do before committing.', nextSteps: ['Preview the Challenge (no logging yet)', 'Join the Challenge', 'Log your first activity on start day'] },
   { id: 'active_commitments', title: 'Active commitments', description: 'You have joined Challenges. Today tells you exactly what to do next.', nextSteps: ['Open Today for ordered actions', 'Complete streak requirements before day-end', 'Cheer community moments with Kudos'] },
 ];
 
@@ -23,7 +23,7 @@ export const OnboardingView: React.FC<{ onBrowseGroups: () => void; onBrowseChal
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-zinc-900 mt-1">Move together. Stay accountable.</h1>
         <p className="text-sm text-zinc-600 mt-1 max-w-2xl leading-relaxed">
           Tiizi is group fitness &amp; wellness built on shared Challenges inside community Groups.
-          Groups host. Challenges commit. Participation — joining affirmatively, then logging governed activities — is what moves the group forward.
+          Groups host. Challenges commit. Participation — joining a Challenge yourself, then logging your activities — is what moves the group forward.
         </p>
       </div>
 
@@ -36,12 +36,12 @@ export const OnboardingView: React.FC<{ onBrowseGroups: () => void; onBrowseChal
         <div className="bg-white rounded-2xl border border-zinc-200 p-5">
           <Trophy className="w-5 h-5 text-amber-600 mb-2" />
           <h3 className="font-extrabold text-sm text-zinc-900">What is a Challenge?</h3>
-          <p className="text-xs text-zinc-600 mt-1 leading-relaxed">A governed commitment: Together (shared total), Race (qualifying finish), or Streak (daily habit). Each has activities, targets, schedule and a home timezone.</p>
+          <p className="text-xs text-zinc-600 mt-1 leading-relaxed">A shared commitment: Together (one shared total), Race (finish your goal), or Streak (a little every day). Each one lists its activities, goal, and schedule.</p>
         </div>
         <div className="bg-white rounded-2xl border border-zinc-200 p-5">
           <Activity className="w-5 h-5 text-emerald-600 mb-2" />
           <h3 className="font-extrabold text-sm text-zinc-900">What is participation?</h3>
-          <p className="text-xs text-zinc-600 mt-1 leading-relaxed">Group Membership ≠ Challenge Participation. You join a Challenge affirmatively; only then does Activity logging count. Creators are never auto-enrolled.</p>
+          <p className="text-xs text-zinc-600 mt-1 leading-relaxed">Being in a Group doesn't automatically join you to its Challenges. You join each Challenge yourself — only then does logging count. Creators are never joined automatically.</p>
         </div>
       </div>
 

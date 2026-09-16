@@ -23,9 +23,10 @@ export const OperatorGroups: React.FC = () => {
               <div className="flex justify-between"><dt>Pending requests</dt><dd className="font-bold text-zinc-900">{g.pendingRequests}</dd></div>
             </dl>
             <div className="flex gap-1.5 pt-1">
-              <button className="flex-1 px-2 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">Inspect rules (mock)</button>
-              <button className="flex-1 px-2 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">History (mock)</button>
+              <button className="flex-1 px-2 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer" title="View-only: rules, roster and reports.">Inspect rules (mock · view)</button>
+              <button className="flex-1 px-2 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer" title="View-only: past changes from the Audit Log.">History (mock · view)</button>
             </div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 pt-1">Act (mock — confirm → audit trail)</p>
             <div className="flex gap-1.5">
               <button title="Intent: pause group visibility pending review. Requires confirm; writes to Audit Log; permission-dependent." className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Suspend (mock · confirm → audit)</button>
               <button title="Intent: restore group after review. Requires confirm; writes to Audit Log; permission-dependent." className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Reactivate (mock · confirm → audit)</button>

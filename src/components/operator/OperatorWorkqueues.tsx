@@ -25,7 +25,7 @@ export const OperatorApprovals: React.FC = () => {
   return (
     <div className="space-y-4">
       <div><h1 className="text-xl sm:text-2xl font-black tracking-tight">Review &amp; Attention</h1>
-      <p className="text-xs text-zinc-500">One operator queue holding approvals, reviews, moderation, support interventions, exceptions, reconciliation and attention items — not every item is a formal approval workflow. Each item is labelled mock.</p></div>
+      <p className="text-xs text-zinc-500">One operator queue holding approvals, reviews, moderation, support interventions, exceptions, reconciliation and attention items — not every item is a formal approval workflow. Each item is labelled mock. Next step: open an item, confirm an action, then check the Audit Log.</p></div>
       <div className="space-y-2">
         <h2 className="font-extrabold text-xs uppercase tracking-wider text-zinc-500">Formal approvals (mock)</h2>
         {formal.map(renderRow)}
