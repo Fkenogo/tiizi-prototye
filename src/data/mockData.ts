@@ -14,6 +14,26 @@ export const CURRENT_USER_AMINA: Member = {
     currentActiveCount: 3,
     kudosReceived: 142,
   },
+  recognitions: [
+    {
+      id: 'rec-1',
+      title: 'Podium Finisher — Position #2',
+      challengeTitle: 'Karura Forest Sunrise 100K Race',
+      issuedAt: 'Aug 28, 2026',
+      tier: 'podium',
+      summary: 'Completed 100 km qualifying distance within the governed competition window.',
+      governedProof: 'Standard Competition Rank #2 • Verified by Nairobi Morning Movers',
+    },
+    {
+      id: 'rec-2',
+      title: '30-Day Consecutive Consistency Master',
+      challengeTitle: 'July 30-Day Morning Habit',
+      issuedAt: 'Jul 31, 2026',
+      tier: 'consistency_master',
+      summary: 'Logged 30 unbroken consecutive days without streak failure.',
+      governedProof: 'Full 30-Day Calendar Attested • Nairobi Timezone',
+    },
+  ],
 };
 
 export const STEWARD_WANJIKU: Member = {
@@ -30,6 +50,17 @@ export const STEWARD_WANJIKU: Member = {
     currentActiveCount: 4,
     kudosReceived: 389,
   },
+  recognitions: [
+    {
+      id: 'rec-3',
+      title: 'Founding Group Steward Credential',
+      challengeTitle: 'Community Stewardship Governance',
+      issuedAt: 'Oct 15, 2025',
+      tier: 'completed',
+      summary: 'Verified community leader and circle steward for Nairobi Morning Movers.',
+      governedProof: 'Charter Steward Verification #001',
+    },
+  ],
 };
 
 export const MEMBER_KIPCHOGE: Member = {
@@ -46,6 +77,17 @@ export const MEMBER_KIPCHOGE: Member = {
     currentActiveCount: 3,
     kudosReceived: 512,
   },
+  recognitions: [
+    {
+      id: 'rec-4',
+      title: 'First Finisher — Position #1',
+      challengeTitle: 'Karura Forest Sunrise 100K Race',
+      issuedAt: 'Aug 24, 2026',
+      tier: 'podium',
+      summary: 'First participant to complete the 100 km qualifying distance.',
+      governedProof: 'Standard Competition Rank #1 • Record 4d 14h 22m',
+    },
+  ],
 };
 
 export const MEMBER_DAVID: Member = {
@@ -62,6 +104,17 @@ export const MEMBER_DAVID: Member = {
     currentActiveCount: 2,
     kudosReceived: 88,
   },
+  recognitions: [
+    {
+      id: 'rec-5',
+      title: 'Habit Re-ignition Certificate',
+      challengeTitle: 'September 30-Day Morning Movement',
+      issuedAt: 'Sep 12, 2026',
+      tier: 'completed',
+      summary: 'Successfully restarted consecutive movement chain and achieved cumulative consistency record.',
+      governedProof: 'Cumulative 18-Day Total Preserved Record',
+    },
+  ],
 };
 
 export const ALL_MEMBERS: Member[] = [

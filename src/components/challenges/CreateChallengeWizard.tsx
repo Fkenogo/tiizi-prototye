@@ -27,6 +27,9 @@ import {
   Layers,
   Heart,
   ShieldCheck,
+  Edit3,
+  AlertTriangle,
+  UserCheck,
 } from 'lucide-react';
 
 interface CreateChallengeWizardProps {
@@ -49,12 +52,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   initialTemplateId,
 }) => {
   // Step sequence:
-  // 1: Choose Archetype & Template
-  // 2: Host Group & Story (Title, Description, Cover)
+  // 1: Choose Archetype & Template (Together, Race, Streak)
+  // 2: Host Group & Story
   // 3: What are we doing? (Canonical Activities)
   // 4: What counts? (Metrics, Targets, Daily Rules)
-  // 5: When? (Duration, Start Date, Timezone)
-  // 6: Review & Launch
+  // 5: When? (Schedule, Duration, Timezone)
+  // 6: Review: "This is the Challenge you're creating" with section edit links & creator join decision
   const [step, setStep] = useState<number>(1);
 
   // Form State
@@ -78,6 +81,9 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<'All' | 'Fitness' | 'Wellness'>('All');
   const [isCause, setIsCause] = useState(false);
   const [causeName, setCauseName] = useState('');
+
+  // Explicit affirmative creator participation (Product Truth: Creator participation must NOT be assumed)
+  const [creatorWillJoin, setCreatorWillJoin] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -126,11 +132,11 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
     if (challengeType === 'collective') {
       const primary = activityConfigs[selectedActivityIds[0]] || { targetValue: 500, unit: 'km' };
-      return `Everyone in ${currentHostGroup.name} contributes toward a shared goal of ${primary.targetValue} ${primary.unit} of ${actNames} over ${durationDays} days in ${timezone}.`;
+      return `Everyone in ${currentHostGroup.name} contributes together toward a shared milestone of ${primary.targetValue} ${primary.unit} of ${actNames} over ${durationDays} days in ${timezone}.`;
     }
     if (challengeType === 'competitive') {
       const primary = activityConfigs[selectedActivityIds[0]] || { targetValue: 100, unit: 'km' };
-      return `First participants in ${currentHostGroup.name} to log ${primary.targetValue} ${primary.unit} of ${actNames} before the ${durationDays}-day window ends win podium ranks.`;
+      return `Participants in ${currentHostGroup.name} strive to complete ${primary.targetValue} ${primary.unit} of ${actNames} before the ${durationDays}-day window ends in ${timezone}. Qualifying finishers receive standard competition finishing positions.`;
     }
     // Streak
     const reqs = selectedActivityIds
@@ -140,7 +146,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
         return `${c?.targetValue || 15} ${c?.unit || 'min'} of ${act?.name || id}`;
       })
       .join(' and ');
-    return `Complete ${reqs} every single day in ${timezone} to keep your daily streak alive over ${durationDays} days.`;
+    return `Complete ${reqs} before the Challenge day ends in ${timezone} to maintain your daily streak over ${durationDays} days.`;
   };
 
   const handleToggleActivity = (actId: string) => {
@@ -231,6 +237,27 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
       unit: 'km',
     };
 
+    // Product Truth: Group Membership ≠ Challenge Participation. Creator is NOT silently enrolled.
+    const initialParticipants = creatorWillJoin
+      ? [
+          {
+            memberId: currentMember.id,
+            name: currentMember.name,
+            avatar: currentMember.avatar,
+            accumulatedValue: 0,
+            unit: primaryCfg.unit,
+            lastContributionAt: 'Joined upon creation',
+            rank: null,
+            finished: false,
+            daysCompleted: 0,
+            currentStreak: 0,
+            bestStreak: 0,
+            todayCompleted: false,
+            todayRequirementsDone: {},
+          },
+        ]
+      : [];
+
     const newChallenge: Challenge = {
       id: `ch-${Date.now()}`,
       title: title.trim() || `${currentHostGroup.name} Challenge`,
@@ -256,23 +283,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
       summarySentence: generateSummary(),
       isCause,
       causeName: isCause ? causeName : undefined,
-      participants: [
-        {
-          memberId: currentMember.id,
-          name: currentMember.name,
-          avatar: currentMember.avatar,
-          accumulatedValue: 0,
-          unit: primaryCfg.unit,
-          lastContributionAt: 'Just joined',
-          rank: null,
-          finished: false,
-          daysCompleted: 0,
-          currentStreak: 0,
-          bestStreak: 0,
-          todayCompleted: false,
-          todayRequirementsDone: {},
-        },
-      ],
+      participants: initialParticipants,
       collectiveProgress:
         challengeType === 'collective'
           ? {
@@ -308,10 +319,10 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   });
 
   const stepTitles = [
-    'How does it work?',
-    'Who is hosting?',
+    'How it works (Archetype)',
+    'Who is hosting & story',
     'What are we doing?',
-    'What counts & target?',
+    'What counts & targets?',
     'When does it run?',
     'Review & Launch',
   ];
@@ -358,19 +369,19 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
         {/* Step Body */}
         <div className="p-5 sm:p-6 flex-1 overflow-y-auto space-y-6">
-          {/* STEP 1: CHOOSE ARCHETYPE & OPTIONAL TEMPLATE */}
+          {/* STEP 1: CHOOSE ARCHETYPE & TEMPLATE */}
           {step === 1 && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-base font-bold text-zinc-900">
-                  How should this challenge work?
+                  Choose the Challenge Archetype
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Choose how your community will participate and achieve progress together.
+                  Governed rules determine how participation accumulates and how outcomes are recognized.
                 </p>
               </div>
 
-              {/* 3 Governed Archetypes */}
+              {/* 3 Governed Archetypes with dual naming: Human Title + Canonical Label */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <button
                   type="button"
@@ -385,13 +396,18 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
                       <Users className="w-5 h-5" />
                     </div>
-                    <h4 className="font-extrabold text-sm text-zinc-900">Collective Goal</h4>
-                    <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                    <div className="mb-1">
+                      <h4 className="font-extrabold text-sm text-zinc-900 leading-tight">Together</h4>
+                      <span className="text-[10px] text-zinc-400 font-bold block">
+                        Collective challenge
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
                       Everyone contributes to one shared milestone. Celebrates team solidarity and can exceed 100%.
                     </p>
                   </div>
                   <span className="mt-4 text-[10px] uppercase font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md inline-block self-start">
-                    Shared Target
+                    Shared Outcome
                   </span>
                 </button>
 
@@ -408,13 +424,18 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center mb-3">
                       <Award className="w-5 h-5" />
                     </div>
-                    <h4 className="font-extrabold text-sm text-zinc-900">Competitive Race</h4>
-                    <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                      First participants to reach the target win governed podium ranks (1, 2, 2, 4 tie-breaker rules).
+                    <div className="mb-1">
+                      <h4 className="font-extrabold text-sm text-zinc-900 leading-tight">Race</h4>
+                      <span className="text-[10px] text-zinc-400 font-bold block">
+                        Competitive challenge
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
+                      Participants strive to hit the qualifying milestone. Standard competition finishing positions (1, 2, 2, 4) with shared ties.
                     </p>
                   </div>
                   <span className="mt-4 text-[10px] uppercase font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-md inline-block self-start">
-                    Podium Race
+                    Finishing Positions
                   </span>
                 </button>
 
@@ -431,23 +452,33 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center mb-3">
                       <Flame className="w-5 h-5" />
                     </div>
-                    <h4 className="font-extrabold text-sm text-zinc-900">Daily Streak</h4>
-                    <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
-                      Build daily habit consistency. Complete requirements every day before midnight. No ranking leaderboard.
+                    <div className="mb-1">
+                      <h4 className="font-extrabold text-sm text-zinc-900 leading-tight">Streak</h4>
+                      <span className="text-[10px] text-zinc-400 font-bold block">
+                        Daily consistency challenge
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
+                      Build daily habit consistency. Complete requirements before the challenge day ends in the governing timezone.
                     </p>
                   </div>
                   <span className="mt-4 text-[10px] uppercase font-bold text-orange-800 bg-orange-100 px-2 py-0.5 rounded-md inline-block self-start">
-                    Consistency
+                    Habit Chain
                   </span>
                 </button>
               </div>
 
-              {/* Ready-to-go Community Templates */}
+              {/* Ready-to-go Community Templates (Pre-filled configuration shortcuts) */}
               <div className="pt-3 border-t border-zinc-100">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                  Or start with a proven community blueprint
-                </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                    <span>Pre-filled Configuration Templates</span>
+                  </h4>
+                  <span className="text-[11px] text-zinc-400">
+                    Editable shortcuts into this same creation flow
+                  </span>
+                </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   {CHALLENGE_TEMPLATES.map((tpl) => (
@@ -486,14 +517,14 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   Who is hosting this challenge?
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Challenges exist within a group community. Select the host group and set your challenge identity.
+                  Challenges are hosted inside a community group. Select the host circle and define its identity.
                 </p>
               </div>
 
               {/* Host Group Selection */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                  Host Group
+                  Host Community Group
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {allGroups.map((grp) => {
@@ -541,7 +572,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   placeholder="e.g., Sunrise 500 KM Community Walk"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden focus:border-orange-500 focus:bg-white"
+                  className="w-full px-3.5 py-2.5 text-sm bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden focus:border-orange-500 focus:bg-white font-medium"
                 />
               </div>
 
@@ -559,14 +590,14 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 />
               </div>
 
-              {/* Cause Toggle */}
+              {/* Community Cause Dedication (No monetary fundraising / financial custody) */}
               <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-200 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Heart className="w-4 h-4 text-emerald-600" />
                     <div>
-                      <p className="text-xs font-bold text-emerald-950">Is this for a community cause?</p>
-                      <p className="text-[11px] text-emerald-700">Dedicate accumulated movement to awareness or charity</p>
+                      <p className="text-xs font-bold text-emerald-950">Community Cause Dedication</p>
+                      <p className="text-[11px] text-emerald-700">Dedicate movement to a cause or external sponsor pledge (self-reported)</p>
                     </div>
                   </div>
                   <input
@@ -578,13 +609,18 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </div>
 
                 {isCause && (
-                  <input
-                    type="text"
-                    placeholder="Cause name, e.g., Karura Forest Conservation Initiative"
-                    value={causeName}
-                    onChange={(e) => setCauseName(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-white rounded-lg border border-emerald-300 focus:outline-hidden"
-                  />
+                  <div className="space-y-1.5 pt-1">
+                    <input
+                      type="text"
+                      placeholder="Cause name, e.g., Karura Forest Conservation Initiative"
+                      value={causeName}
+                      onChange={(e) => setCauseName(e.target.value)}
+                      className="w-full px-3 py-2 text-xs bg-white rounded-lg border border-emerald-300 focus:outline-hidden font-medium"
+                    />
+                    <p className="text-[10px] text-emerald-800">
+                      *Note: Tiizi tracks pledged movement dedication. Tiizi does not handle financial donations or payment escrow.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -598,9 +634,20 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   What activities count toward this challenge?
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Select canonical activities from the governed catalogue. Streak challenges support multi-activity daily habits.
+                  Select canonical activities from the catalogue. Streak challenges support multi-activity daily habits.
                 </p>
               </div>
+
+              {/* Governed Multiplicity Warning for Collective/Race */}
+              {challengeType !== 'streak' && selectedActivityIds.length > 1 && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Governed Configuration Note: </span>
+                    Collective & Race challenges default to measuring a single canonical activity. Combining multiple activities requires governed metric equivalence engines.
+                  </div>
+                </div>
+              )}
 
               {/* Search & Category Filter */}
               <div className="flex flex-col sm:flex-row gap-2">
@@ -611,7 +658,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     placeholder="Search canonical activities..."
                     value={activitySearch}
                     onChange={(e) => setActivitySearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden focus:border-orange-500"
+                    className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden focus:border-orange-500 font-medium"
                   />
                 </div>
 
@@ -688,9 +735,9 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   {challengeType === 'collective' &&
                     'Set the shared group target that all participants will contribute toward.'}
                   {challengeType === 'competitive' &&
-                    'Set the target race milestone that participants will sprint toward.'}
+                    'Set the qualifying race milestone that participants strive to complete.'}
                   {challengeType === 'streak' &&
-                    'Set what must be accomplished every single day to keep the streak alive.'}
+                    'Set what must be accomplished every single day before the day ends.'}
                 </p>
               </div>
 
@@ -852,21 +899,21 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   <option value="Asia/Tokyo (JST)">Asia/Tokyo (JST, UTC+9)</option>
                 </select>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Daily resets for streak challenges occur precisely at 23:59 in this timezone.
+                  Daily resets for streak challenges occur strictly when the challenge day concludes in this governing timezone.
                 </p>
               </div>
             </div>
           )}
 
-          {/* STEP 6: REVIEW & LAUNCH */}
+          {/* STEP 6: REVIEW & LAUNCH — "This is the Challenge you're creating" */}
           {step === 6 && (
             <div className="space-y-5">
               <div>
-                <h3 className="text-base font-bold text-zinc-900">
-                  Ready to launch your community challenge
+                <h3 className="text-base font-extrabold text-zinc-900">
+                  This is the Challenge you're creating.
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Review the governed challenge configuration before publishing to {currentHostGroup.name}.
+                  Review the governed configuration before publishing to {currentHostGroup.name}. Use edit links to adjust any section.
                 </p>
               </div>
 
@@ -874,7 +921,9 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               <div className="p-5 rounded-2xl bg-zinc-900 text-white space-y-3 shadow-md">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-500 text-white">
-                    {challengeType.toUpperCase()} CHALLENGE
+                    {challengeType === 'collective' && 'Together (Collective)'}
+                    {challengeType === 'competitive' && 'Race (Competitive)'}
+                    {challengeType === 'streak' && 'Streak (Daily Consistency)'}
                   </span>
                   <span className="text-xs text-zinc-400 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-orange-400" />
@@ -891,8 +940,129 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </p>
 
                 <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
-                  <span>Host: <strong className="text-white">{currentHostGroup.name}</strong></span>
+                  <span>Host Group: <strong className="text-white">{currentHostGroup.name}</strong></span>
                   <span>Timezone: <strong className="text-white">{timezone}</strong></span>
+                </div>
+              </div>
+
+              {/* Structured Section Review with Direct Edit Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 1. Host Group */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                      Host Community
+                    </span>
+                    <p className="text-xs font-bold text-zinc-900 mt-0.5">{currentHostGroup.name}</p>
+                    <p className="text-[11px] text-zinc-500">{currentHostGroup.location}</p>
+                  </div>
+                  <button
+                    onClick={() => setStep(2)}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                {/* 2. Challenge Archetype */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                      Archetype & Rules
+                    </span>
+                    <p className="text-xs font-bold text-zinc-900 mt-0.5 capitalize">{challengeType} Challenge</p>
+                    <p className="text-[11px] text-zinc-500">
+                      {challengeType === 'collective' && 'Shared milestone, over-100% permitted'}
+                      {challengeType === 'competitive' && '1, 2, 2, 4 standard competition ties'}
+                      {challengeType === 'streak' && 'Daily habits with timezone reset'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setStep(1)}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                {/* 3. Activities */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                      Canonical Activities
+                    </span>
+                    <p className="text-xs font-bold text-zinc-900 mt-0.5">
+                      {selectedActivityIds.map((id) => CANONICAL_ACTIVITIES.find((a) => a.id === id)?.name).join(', ')}
+                    </p>
+                    <p className="text-[11px] text-zinc-500">{selectedActivityIds.length} activity configured</p>
+                  </div>
+                  <button
+                    onClick={() => setStep(3)}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                {/* 4. Schedule & Timezone */}
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
+                      Schedule & Boundary
+                    </span>
+                    <p className="text-xs font-bold text-zinc-900 mt-0.5">{durationDays} Days • Starts {startDate}</p>
+                    <p className="text-[11px] text-zinc-500">{timezone}</p>
+                  </div>
+                  <button
+                    onClick={() => setStep(5)}
+                    className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 cursor-pointer"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Explicit Creator Participation Decision (Product Truth Alignment) */}
+              <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <UserCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                  <div>
+                    <h4 className="text-xs font-bold text-amber-950">
+                      Creator Participation Decision
+                    </h4>
+                    <p className="text-[11px] text-amber-800">
+                      Group Membership ≠ Challenge Participation. Creating a challenge does not enroll you automatically.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setCreatorWillJoin(true)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold border text-center transition-all cursor-pointer ${
+                      creatorWillJoin
+                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                        : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50'
+                    }`}
+                  >
+                    ✓ Yes, Join this Challenge as a Participant
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreatorWillJoin(false)}
+                    className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold border text-center transition-all cursor-pointer ${
+                      !creatorWillJoin
+                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-2xs'
+                        : 'bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50'
+                    }`}
+                  >
+                    Create Without Joining (Organizer / Steward Only)
+                  </button>
                 </div>
               </div>
 
@@ -901,12 +1071,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 <h5 className="font-bold text-zinc-900">Governed Rules Verified:</h5>
                 <div className="flex items-center gap-2 text-zinc-700">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Only logs for selected canonical activities will count toward this goal.</span>
+                  <span>Only logs for designated canonical activities count toward this challenge.</span>
                 </div>
                 {challengeType === 'streak' && (
                   <div className="flex items-center gap-2 text-zinc-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Daily requirements must be logged before 23:59 {timezone} each day.</span>
+                    <span>Daily requirements must be logged before the day ends in {timezone}.</span>
                   </div>
                 )}
                 {challengeType === 'collective' && (
@@ -918,7 +1088,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 {challengeType === 'competitive' && (
                   <div className="flex items-center gap-2 text-zinc-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Podium ranking enforces strict tie-breakers (1, 2, 2, 4) upon hitting target.</span>
+                    <span>Qualifying finishers receive standard competition finishing positions (1, 2, 2, 4 ties).</span>
                   </div>
                 )}
               </div>

@@ -12,6 +12,7 @@ import {
   TrendingUp,
   RotateCcw,
   BookOpen,
+  Shield,
 } from 'lucide-react';
 
 interface ExperienceBarProps {
@@ -19,6 +20,7 @@ interface ExperienceBarProps {
   onSwitchMember: (member: Member) => void;
   onSelectJourney: (journeyId: string) => void;
   onOpenArchitectureDocs: () => void;
+  onOpenAssumptionsRegister?: () => void;
   onToggleExceededState?: () => void;
   targetExceeded: boolean;
 }
@@ -28,6 +30,7 @@ export const ExperienceBar: React.FC<ExperienceBarProps> = ({
   onSwitchMember,
   onSelectJourney,
   onOpenArchitectureDocs,
+  onOpenAssumptionsRegister,
   onToggleExceededState,
   targetExceeded,
 }) => {
@@ -41,9 +44,9 @@ export const ExperienceBar: React.FC<ExperienceBarProps> = ({
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 flex flex-wrap items-center justify-between gap-2">
         {/* Left: Badge & Persona Switcher */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-md font-semibold tracking-wide uppercase text-[10px]">
+          <div className="flex items-center gap-1.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-0.5 rounded-md font-bold tracking-wide uppercase text-[10px]">
             <Compass className="w-3 h-3" />
-            <span>Experience Reference</span>
+            <span>Tiizi Experience Reference v1</span>
           </div>
 
           <div className="flex items-center gap-1.5 bg-zinc-800/80 px-2 py-1 rounded-md border border-zinc-700/60">
@@ -122,6 +125,17 @@ export const ExperienceBar: React.FC<ExperienceBarProps> = ({
               + Create Wizard
             </button>
           </div>
+
+          {onOpenAssumptionsRegister && (
+            <button
+              onClick={onOpenAssumptionsRegister}
+              className="flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-md font-semibold text-xs transition-colors shadow-xs"
+              title="Open the Governed Product Assumptions & Decisions Register"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-400" />
+              <span>Assumptions Register (10)</span>
+            </button>
+          )}
 
           <button
             onClick={onOpenArchitectureDocs}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Member, Group } from '../../types';
+import { Member, Group, NavigationVariant } from '../../types';
 import {
   Flame,
   Bell,
@@ -15,6 +15,7 @@ import {
   Activity,
   Menu,
   X,
+  HelpCircle,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -22,6 +23,7 @@ interface HeaderProps {
   onSelectTab: (tab: 'today' | 'challenges' | 'groups' | 'catalogue') => void;
   currentMember: Member;
   unreadNotificationCount: number;
+  navVariant?: NavigationVariant;
   onOpenNotifications: () => void;
   onOpenReferenceDrawer: () => void;
   onOpenProfileDrawer: () => void;
@@ -32,6 +34,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectTab,
   currentMember,
   unreadNotificationCount,
+  navVariant = 'variant_b',
   onOpenNotifications,
   onOpenReferenceDrawer,
   onOpenProfileDrawer,
@@ -97,21 +100,40 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 Groups
               </button>
-              <button
-                onClick={() => onSelectTab('catalogue')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  currentTab === 'catalogue'
-                    ? 'bg-white text-orange-600 font-bold shadow-xs'
-                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50'
-                }`}
-                title="Canonical Activity Guide"
-              >
-                Activity Guide
-              </button>
+              {/* Only in Variant A is Activity Guide a primary nav tab */}
+              {navVariant === 'variant_a' && (
+                <button
+                  onClick={() => onSelectTab('catalogue')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    currentTab === 'catalogue'
+                      ? 'bg-white text-orange-600 font-bold shadow-xs'
+                      : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50'
+                  }`}
+                  title="Canonical Activity Guide"
+                >
+                  Activity Guide
+                </button>
+              )}
             </nav>
 
             {/* Right: Actions (Reference Mode trigger, Notifications, Profile) */}
             <div className="flex items-center gap-2">
+              {/* Contextual Guide quick-link for Variant B */}
+              {navVariant === 'variant_b' && (
+                <button
+                  onClick={() => onSelectTab('catalogue')}
+                  className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer border ${
+                    currentTab === 'catalogue'
+                      ? 'bg-orange-50 text-orange-700 border-orange-200'
+                      : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100 border-zinc-200'
+                  }`}
+                  title="Explore Canonical Activity Knowledge"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Activity Guide</span>
+                </button>
+              )}
+
               {/* Engineering Experience Reference Mode Trigger */}
               <button
                 onClick={onOpenReferenceDrawer}
@@ -206,19 +228,23 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-[11px]">Groups</span>
           </button>
 
-          <button
-            onClick={() => onSelectTab('catalogue')}
-            className={`flex-1 flex flex-col items-center justify-center h-full gap-0.5 cursor-pointer transition-colors ${
-              currentTab === 'catalogue'
-                ? 'text-orange-600 font-bold'
-                : 'text-zinc-500 hover:text-zinc-900 font-medium'
-            }`}
-          >
-            <BookOpen className="w-5 h-5" />
-            <span className="text-[11px]">Activities</span>
-          </button>
+          {/* If Variant A, show Activities in bottom bar; if Variant B, 3 tabs ensure maximum touch area & focus */}
+          {navVariant === 'variant_a' && (
+            <button
+              onClick={() => onSelectTab('catalogue')}
+              className={`flex-1 flex flex-col items-center justify-center h-full gap-0.5 cursor-pointer transition-colors ${
+                currentTab === 'catalogue'
+                  ? 'text-orange-600 font-bold'
+                  : 'text-zinc-500 hover:text-zinc-900 font-medium'
+              }`}
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="text-[11px]">Activities</span>
+            </button>
+          )}
         </div>
       </nav>
     </>
   );
 };
+

@@ -26,6 +26,7 @@ interface ReferenceDrawerProps {
   onSwitchMember: (member: Member) => void;
   onSelectJourney: (journeyId: string) => void;
   onOpenArchitectureDocs: () => void;
+  onOpenAssumptionsRegister?: () => void;
   onToggleExceededState: () => void;
   targetExceeded: boolean;
 }
@@ -37,6 +38,7 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
   onSwitchMember,
   onSelectJourney,
   onOpenArchitectureDocs,
+  onOpenAssumptionsRegister,
   onToggleExceededState,
   targetExceeded,
 }) => {
@@ -243,7 +245,23 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
             </div>
 
             {/* Section 4: Architecture & Domain Truth */}
-            <div className="pt-2 border-t border-zinc-800">
+            <div className="pt-2 border-t border-zinc-800 space-y-2">
+              {onOpenAssumptionsRegister && (
+                <button
+                  onClick={() => {
+                    onOpenAssumptionsRegister();
+                    onClose();
+                  }}
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-zinc-800 hover:bg-zinc-700/90 border border-amber-500/40 text-amber-300 font-bold transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    <span>Governed Assumptions Register (10)</span>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-amber-400" />
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   onOpenArchitectureDocs();

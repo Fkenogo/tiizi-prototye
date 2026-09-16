@@ -20,6 +20,7 @@ import {
   INITIAL_NOTIFICATIONS,
 } from './data/mockData';
 import { Header } from './components/common/Header';
+import { ExperienceBar } from './components/common/ExperienceBar';
 import { ReferenceDrawer } from './components/reference/ReferenceDrawer';
 import { ProfileDrawer } from './components/common/ProfileDrawer';
 import { NotificationsDrawer } from './components/common/NotificationsDrawer';
@@ -34,6 +35,7 @@ import { CreateGroupModal } from './components/groups/CreateGroupModal';
 import { ActivityCatalogueView } from './components/catalogue/ActivityCatalogueView';
 import { ShareModal } from './components/social/ShareModal';
 import { ArchitectureDocsModal } from './components/reference/ArchitectureDocsModal';
+import { AssumptionsRegisterModal } from './components/reference/AssumptionsRegisterModal';
 
 export default function App() {
   // Navigation & View State
@@ -61,6 +63,7 @@ export default function App() {
   const [shareModalChallenge, setShareModalChallenge] = useState<Challenge | null>(null);
   const [notificationsDrawerOpen, setNotificationsDrawerOpen] = useState(false);
   const [architectureDocsOpen, setArchitectureDocsOpen] = useState(false);
+  const [assumptionsModalOpen, setAssumptionsModalOpen] = useState(false);
   const [targetExceeded, setTargetExceeded] = useState(false);
 
   // Toggle Exceeded State for Collective demonstration (>100%)
@@ -334,6 +337,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8F9FA] text-zinc-900 pb-16 md:pb-0">
+      {/* 0. Engineering Experience Reference Top Controller Bar */}
+      <ExperienceBar
+        currentMember={currentMember}
+        onSwitchMember={handleSwitchMember}
+        onSelectJourney={handleSelectJourney}
+        onOpenArchitectureDocs={() => setArchitectureDocsOpen(true)}
+        onOpenAssumptionsRegister={() => setAssumptionsModalOpen(true)}
+        onToggleExceededState={handleToggleExceeded}
+        targetExceeded={targetExceeded}
+      />
+
       {/* 1. Main Mobile-First Tiizi Header with Reference Trigger */}
       <Header
         currentTab={currentTab}
@@ -436,17 +450,25 @@ export default function App() {
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-zinc-900 tracking-tight">tiizi</span>
-            <span>• Experience Reference & Governed Engine Prototype</span>
+            <span>• Tiizi Experience Reference v1</span>
           </div>
           <p className="text-[11px] text-zinc-400">
             Product truth governs engines; Experience Reference governs human-facing assembly.
           </p>
-          <button
-            onClick={() => setArchitectureDocsOpen(true)}
-            className="text-orange-600 hover:text-orange-700 font-bold text-xs underline cursor-pointer"
-          >
-            UX Architecture & Governed Specs
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setAssumptionsModalOpen(true)}
+              className="text-amber-700 hover:text-amber-800 font-bold text-xs underline cursor-pointer"
+            >
+              Assumptions Register (10)
+            </button>
+            <button
+              onClick={() => setArchitectureDocsOpen(true)}
+              className="text-orange-600 hover:text-orange-700 font-bold text-xs underline cursor-pointer"
+            >
+              UX Architecture Reference
+            </button>
+          </div>
         </div>
       </footer>
 
@@ -458,6 +480,7 @@ export default function App() {
         onSwitchMember={handleSwitchMember}
         onSelectJourney={handleSelectJourney}
         onOpenArchitectureDocs={() => setArchitectureDocsOpen(true)}
+        onOpenAssumptionsRegister={() => setAssumptionsModalOpen(true)}
         onToggleExceededState={handleToggleExceeded}
         targetExceeded={targetExceeded}
       />
@@ -532,6 +555,11 @@ export default function App() {
       <ArchitectureDocsModal
         isOpen={architectureDocsOpen}
         onClose={() => setArchitectureDocsOpen(false)}
+      />
+
+      <AssumptionsRegisterModal
+        isOpen={assumptionsModalOpen}
+        onClose={() => setAssumptionsModalOpen(false)}
       />
     </div>
   );

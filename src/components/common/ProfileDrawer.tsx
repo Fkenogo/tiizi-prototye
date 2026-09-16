@@ -121,6 +121,48 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               </div>
             </div>
 
+            {/* Governed System Recognitions (System Credentials vs Community Kudos) */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
+                  <Award className="w-3.5 h-3.5 text-amber-500" />
+                  <span>System Recognitions</span>
+                </h4>
+                <span className="text-[10px] font-semibold text-zinc-400">
+                  Permanent Credentials
+                </span>
+              </div>
+
+              {currentMember.recognitions && currentMember.recognitions.length > 0 ? (
+                <div className="space-y-2">
+                  {currentMember.recognitions.map((rec) => (
+                    <div
+                      key={rec.id}
+                      className="p-3 bg-linear-to-br from-amber-500/5 via-amber-500/10 to-transparent rounded-xl border border-amber-200/80 space-y-1"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-xs font-bold text-zinc-900 leading-snug">
+                          {rec.title}
+                        </span>
+                        <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200 shrink-0">
+                          {rec.tier.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-zinc-600 leading-normal">{rec.summary}</p>
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-zinc-500 border-t border-amber-200/40">
+                        <span>{rec.challengeTitle}</span>
+                        <span>{rec.issuedAt}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center text-xs text-zinc-500">
+                  Complete challenges to earn verified system recognitions.
+                </div>
+              )}
+            </div>
+
             {/* My Active Challenges */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400">

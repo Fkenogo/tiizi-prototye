@@ -22,6 +22,19 @@ export interface CanonicalActivity {
   iconName: string;
 }
 
+export interface SystemRecognition {
+  id: string;
+  title: string;
+  badge?: string;
+  tier?: 'Gold' | 'Silver' | 'Bronze' | 'Honorable' | 'podium' | 'consistency_master' | 'completed';
+  awardedDate?: string;
+  issuedAt?: string;
+  challengeTitle?: string;
+  reason?: string;
+  summary?: string;
+  governedProof?: string;
+}
+
 export interface Member {
   id: string;
   name: string;
@@ -36,6 +49,7 @@ export interface Member {
     currentActiveCount: number;
     kudosReceived: number;
   };
+  recognitions?: SystemRecognition[];
 }
 
 export interface Group {
@@ -51,7 +65,26 @@ export interface Group {
   activeChallengeIds: string[];
   tags: string[];
   rules: string[];
+  allowMemberCreation?: boolean;
 }
+
+export type AssumptionCategory =
+  | 'EXPERIENCE HYPOTHESIS'
+  | 'PRODUCT TRUTH'
+  | 'NEEDS FOUNDER DECISION'
+  | 'OUT OF SCOPE';
+
+export interface AssumptionItem {
+  id: string;
+  title: string;
+  category: AssumptionCategory;
+  statement: string;
+  rationale: string;
+  prototypeBehavior: string;
+}
+
+export type NavigationVariant = 'variant_a' | 'variant_b';
+
 
 export interface ChallengeActivityConfig {
   activityId: string;

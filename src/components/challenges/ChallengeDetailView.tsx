@@ -177,21 +177,49 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
                   <span>Log Activity</span>
                 </button>
               ) : (
-                <span className="text-xs font-bold text-zinc-600 bg-zinc-200 px-3 py-1.5 rounded-lg">
-                  Challenge Finalized
+                <span className="text-xs font-bold text-zinc-700 bg-zinc-200/90 border border-zinc-300 px-3.5 py-2 rounded-xl flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                  <span>Sealed Historical Challenge</span>
                 </span>
               )
             ) : (
-              <button
-                onClick={() => onJoinChallenge(challenge.id)}
-                className="w-full sm:w-auto px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl shadow-md shadow-orange-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Check className="w-4 h-4" />
-                <span>Join This Challenge</span>
-              </button>
+              !isCompleted ? (
+                <button
+                  onClick={() => onJoinChallenge(challenge.id)}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl shadow-md shadow-orange-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Join This Challenge</span>
+                </button>
+              ) : (
+                <span className="text-xs font-bold text-zinc-600 bg-zinc-100 px-3 py-1.5 rounded-lg">
+                  Window Closed
+                </span>
+              )
             )}
           </div>
         </div>
+
+        {/* Celebratory Finalized Historic Notice */}
+        {isCompleted && (
+          <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800">
+            <div className="flex items-center gap-2.5 text-xs">
+              <Award className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                <strong className="text-amber-400">Historical Archive:</strong> This challenge window has concluded. All participant milestones are finalized and permanently preserved.
+              </span>
+            </div>
+            {onRunAgain && (
+              <button
+                onClick={() => onRunAgain(challenge)}
+                className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Run Again (Spawn New Cycle)</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Overview Body */}
         <div className="p-5 sm:p-6 space-y-4">
@@ -396,10 +424,13 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
 
           {/* Finishers Table */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-500" />
-              <span>Podium Finishers</span>
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+                <Award className="w-4 h-4 text-amber-500" />
+                <span>Qualifying Finishers (Standard Competition Standing: 1, 2, 2, 4)</span>
+              </h3>
+              <span className="text-[11px] text-zinc-500 font-medium">Shared ties preserve natural rank</span>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {challenge.participants
@@ -412,10 +443,10 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-extrabold text-xs flex items-center justify-center shadow-xs">
-                          {p.rank}
+                          #{p.rank}
                         </span>
                         <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Completed 100k
+                          Target Reached ({challenge.targetValue} {challenge.targetUnit})
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5 mt-2">

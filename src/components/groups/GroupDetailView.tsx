@@ -142,18 +142,40 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
                   : 'bg-zinc-900 hover:bg-black text-white'
               }`}
             >
-              {isJoined ? 'Member of Group' : 'Join Group'}
+              {isJoined ? '✓ Member of Group' : 'Join Group'}
             </button>
 
-            <button
-              onClick={onOpenCreateChallenge}
-              className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Launch Challenge in Group</span>
-            </button>
+            {/* Governed Permission Check: Open Group vs Steward-Led Group */}
+            {group.allowMemberCreation !== false || isSteward ? (
+              <button
+                onClick={onOpenCreateChallenge}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs rounded-xl shadow-md shadow-orange-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Launch Challenge in Group</span>
+              </button>
+            ) : (
+              <div
+                className="px-3.5 py-2 bg-zinc-100 border border-zinc-200 text-zinc-500 font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-not-allowed"
+                title="Only designated group stewards may initiate challenges in this club"
+              >
+                <Lock className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Steward-Curated Challenges</span>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Affirmative Participation Callout Banner */}
+        <div className="bg-amber-50/70 border-b border-amber-200/60 px-5 py-2.5 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-amber-950 font-medium">
+            <Shield className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>
+              <strong>Governed Principle:</strong> Group Membership ≠ Challenge Participation. Being in {group.name} provides community eligibility; you choose which challenges to affirmatively join.
+            </span>
+          </div>
+        </div>
+
 
         {/* Sub Navigation Tabs */}
         <div className="px-5 border-b border-zinc-200 flex items-center gap-6">

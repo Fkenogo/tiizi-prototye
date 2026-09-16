@@ -20,6 +20,7 @@ import {
   Calendar,
   Sparkles,
   ChevronRight,
+  AlertTriangle,
 } from 'lucide-react';
 import { KudoButton } from '../common/KudoButton';
 
@@ -48,7 +49,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
   onNavigateToGroup,
   onKudoMoment,
 }) => {
-  // Challenges where current member is an active participant
+  // Challenges where current member is an affirmative participant
   const myActiveChallenges = challenges.filter(
     (c) =>
       c.status === 'active' &&
@@ -83,6 +84,9 @@ export const TodayView: React.FC<TodayViewProps> = ({
   const isMissedYesterday = streakParticipant?.missedYesterday;
   const todayDone = streakParticipant?.todayCompleted;
 
+  // Determine governing timezone for the active streak challenge
+  const streakTimezone = streakChallenge?.timezone || 'Africa/Nairobi (EAT)';
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-7">
       {/* 1. Contextual Greeting & Daily Time Horizon */}
@@ -90,13 +94,13 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <div>
           <div className="flex items-center gap-2 text-[11px] font-bold text-orange-600 uppercase tracking-wider">
             <Clock className="w-3.5 h-3.5" />
-            <span>Tuesday, Sep 15 • Nairobi Time (EAT)</span>
+            <span>Tuesday, Sep 15 • {streakTimezone}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 mt-1 tracking-tight">
             What to do today, {currentMember.name.split(' ')[0]}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 mt-0.5">
-            Your community commitments and active actions for today.
+            Your daily requirements and community commitments ordered by human urgency.
           </p>
         </div>
 
@@ -109,7 +113,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Priority Action 1: Daily Streak Requirements */}
+      {/* 1. URGENT ACTION REQUIRED TODAY: Daily Streak Requirements */}
       {streakChallenge && streakParticipant && (
         <section
           aria-labelledby="streak-heading"
@@ -130,7 +134,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-bold text-orange-800 uppercase tracking-wider bg-orange-100 px-2 py-0.5 rounded-md">
-                      Daily Streak Challenge
+                      Action Required Today
                     </span>
                     <span className="text-xs text-zinc-500 font-medium">
                       Day {streakChallenge.streakMeta?.currentDayNumber} of{' '}
@@ -183,35 +187,35 @@ export const TodayView: React.FC<TodayViewProps> = ({
               </div>
             </div>
 
-            {/* Missed Day Compassionate Reset Notice (David Persona) */}
+            {/* Missed Day Non-Restoration & Non-Punitive Reset (Product Truth: No fake grace days) */}
             {isMissedYesterday && (
-              <div className="mt-4 p-3.5 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
+              <div className="mt-4 p-3.5 bg-amber-50/90 rounded-xl border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold">Streak Reset Notice: </span>
-                  Yesterday's requirement was missed, resetting your consecutive count to 0.
-                  Your <span className="font-semibold">{streakParticipant.daysCompleted} Total Days Completed</span> and{' '}
-                  <span className="font-semibold">{streakParticipant.bestStreak}-Day Best Record</span> remain safely stored.
-                  Complete today's movements below to restart your consecutive chain!
+                <div className="leading-relaxed">
+                  <span className="font-bold">Governed Streak Reset: </span>
+                  Yesterday's daily requirement was missed. In accordance with strict consistency governance, your Current Streak reset to 0 (no retroactive repairs or grace days).
+                  However, your <strong className="text-zinc-900">{streakParticipant.daysCompleted} Total Days Completed</strong> and{' '}
+                  <strong className="text-zinc-900">{streakParticipant.bestStreak}-Day Best Record</strong> are permanently preserved.
+                  Logging today's requirements will ignite your next consecutive streak!
                 </div>
               </div>
             )}
           </div>
 
-          {/* Today's Requirements Checklist with 1-Click Contextual Action */}
+          {/* Today's Requirements Checklist with Timezone-Aware Boundary */}
           <div className="p-5 sm:p-6">
-            <div className="flex items-center justify-between mb-3.5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700">
                   Today's Governed Requirements
                 </h3>
                 <p className="text-[11px] text-zinc-500">
-                  Must be logged before 23:59 EAT to lock in today's streak.
+                  Complete and log before the Challenge day concludes in {streakTimezone}.
                 </p>
               </div>
-              <span className="text-xs font-semibold text-zinc-500 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-orange-500" />
-                <span>8h 24m remaining</span>
+              <span className="text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-lg border border-orange-200/60 flex items-center gap-1.5 self-start sm:self-auto">
+                <Clock className="w-3.5 h-3.5 text-orange-600" />
+                <span>8h 24m remaining in {streakTimezone.split(' ')[0]}</span>
               </span>
             </div>
 
@@ -268,15 +272,15 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </section>
       )}
 
-      {/* 3. Priority Action 2: Team Milestone & Race Actions */}
+      {/* 2. ACTIVE CHALLENGE PROGRESS: Team Milestone & Race Commitments */}
       <section aria-labelledby="active-challenges-heading" className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 id="active-challenges-heading" className="text-lg font-extrabold text-zinc-900 tracking-tight">
-              Active Group Commitments
+              Active Challenge Progress
             </h2>
             <p className="text-xs text-zinc-500">
-              Contribute your movement to community goals
+              Your ongoing contributions to collective and competitive goals
             </p>
           </div>
           <button
@@ -296,14 +300,14 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider bg-amber-100 px-2 py-0.5 rounded-md">
-                      Collective Target
+                      Together (Collective)
                     </span>
                     <span className="text-[11px] text-zinc-500 font-medium">
                       {collectiveChallenge.groupName}
                     </span>
                   </div>
                   <span className="text-xs font-medium text-zinc-500">
-                    6 days left
+                    6 days remaining in window
                   </span>
                 </div>
 
@@ -321,7 +325,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-100">
                   <div className="flex items-baseline justify-between mb-1.5">
                     <span className="text-xs font-bold text-zinc-700">
-                      Collective Distance
+                      Collective Goal Progress
                     </span>
                     <span className="text-xs font-extrabold text-orange-600 tabular-nums">
                       {collectiveChallenge.collectiveProgress?.totalAccumulated} / {collectiveChallenge.targetValue} {collectiveChallenge.targetUnit}
@@ -347,13 +351,13 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   {(collectiveChallenge.collectiveProgress?.percent || 0) >= 100 && (
                     <div className="mt-2 p-1.5 rounded-lg bg-emerald-100/70 text-emerald-900 text-[11px] font-bold flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                      <span>Target Exceeded! Extra distance counts until deadline.</span>
+                      <span>Target Milestone Reached! Extra contributions count until window close.</span>
                     </div>
                   )}
 
                   <div className="flex items-center justify-between mt-2 text-[11px] text-zinc-500">
                     <span>Your contribution: <strong className="text-zinc-800 font-bold">{collectiveParticipant?.accumulatedValue || 0} km</strong></span>
-                    <span>{collectiveChallenge.participants.length} contributors</span>
+                    <span>{collectiveChallenge.participants.length} participants</span>
                   </div>
                 </div>
               </div>
@@ -378,21 +382,21 @@ export const TodayView: React.FC<TodayViewProps> = ({
             </div>
           )}
 
-          {/* Competitive Race Card */}
+          {/* Competitive Race Card (Governed finishing positions, no winner-takes-all) */}
           {competitiveChallenge && (
             <div className="bg-white rounded-2xl border border-zinc-200 p-5 shadow-xs flex flex-col justify-between hover:border-zinc-300 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] font-bold text-rose-800 uppercase tracking-wider bg-rose-100 px-2 py-0.5 rounded-md">
-                      Competitive Race
+                      Race (Competitive)
                     </span>
                     <span className="text-[11px] text-zinc-500 font-medium">
                       {competitiveChallenge.groupName}
                     </span>
                   </div>
                   <span className="text-xs font-medium text-zinc-500">
-                    15 days left
+                    15 days remaining in window
                   </span>
                 </div>
 
@@ -403,13 +407,13 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   {competitiveChallenge.title}
                 </h3>
                 <p className="text-xs text-zinc-600 mt-1 line-clamp-2 leading-relaxed">
-                  First participants to hit 100 km qualify for governed podium ranks.
+                  Participants strive to complete 100 km before the window ends. Standard competition finishing positions (1, 2, 2, 4) with shared ties.
                 </p>
 
                 {/* Race Status Snapshot */}
                 <div className="mt-4 p-3 bg-zinc-50 rounded-xl border border-zinc-100 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-zinc-500 font-medium">Your Race Progress</span>
+                    <span className="text-zinc-500 font-medium">Your Progress Toward Finish</span>
                     <span className="font-extrabold text-zinc-900 tabular-nums">
                       {competitiveParticipant?.accumulatedValue || 0} / 100 km
                     </span>
@@ -427,10 +431,10 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   <div className="flex items-center justify-between text-[11px] text-zinc-600 pt-1">
                     <span className="flex items-center gap-1">
                       <Award className="w-3.5 h-3.5 text-amber-500" />
-                      <span><strong>3</strong> finished already</span>
+                      <span><strong>3</strong> qualified finishers so far</span>
                     </span>
                     <span className="text-orange-600 font-semibold">
-                      {(100 - (competitiveParticipant?.accumulatedValue || 0)).toFixed(1)} km to finish
+                      {(100 - (competitiveParticipant?.accumulatedValue || 0)).toFixed(1)} km to complete
                     </span>
                   </div>
                 </div>
@@ -449,7 +453,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   onClick={() => onSelectChallenge(competitiveChallenge.id)}
                   className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Podium Standings</span>
+                  <span>Finishing Standings</span>
                   <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
@@ -458,7 +462,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </div>
       </section>
 
-      {/* 4. Open Group Challenges to Join (Invitations / Explore) */}
+      {/* 3. OPPORTUNITIES TO JOIN: Open Group Challenges */}
       {unjoinedChallenges.length > 0 && (
         <section aria-labelledby="unjoined-heading" className="bg-amber-50/50 rounded-2xl border border-amber-200/80 p-5 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
@@ -471,7 +475,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                   Challenges in Your Groups You Can Join
                 </h2>
                 <p className="text-xs text-zinc-600">
-                  Open community initiatives ready for your affirmative participation.
+                  Affirmative opportunities to participate alongside your community.
                 </p>
               </div>
             </div>
@@ -486,7 +490,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1">
                     <span>{ch.groupName}</span>
-                    <span className="text-orange-600">{ch.type}</span>
+                    <span className="text-orange-600 capitalize">{ch.type} Challenge</span>
                   </div>
                   <h3
                     onClick={() => onSelectChallenge(ch.id)}
@@ -517,7 +521,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
         </section>
       )}
 
-      {/* 5. Community Accountability & Recent Moments Feed */}
+      {/* 4. COMMUNITY MOMENTS: Lightweight Social Encouragement Feed */}
       <section aria-labelledby="community-moments-heading" className="bg-white rounded-2xl border border-zinc-200 p-5 sm:p-6 shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -529,7 +533,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
                 Community Accountability Feed
               </h2>
               <p className="text-xs text-zinc-500">
-                Live activity logs, milestones, and achievements from your peers
+                Peer logs, milestone cheers, and lightweight encouragement
               </p>
             </div>
           </div>
