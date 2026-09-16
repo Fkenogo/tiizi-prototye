@@ -50,7 +50,23 @@ export interface Member {
     kudosReceived: number;
   };
   recognitions?: SystemRecognition[];
+  // Experience-reference account state (member directory variety)
+  accountState?: 'active' | 'suspended' | 'invited' | 'inactive';
+  languages?: string[];
+  notificationPrefs?: NotificationPreference[];
+  privacy?: { showProfileToNonMembers?: boolean; showActivityHistory?: boolean };
 }
+
+export type NotificationPreference =
+  | 'group_invite'
+  | 'challenge_invite'
+  | 'challenge_start'
+  | 'challenge_end'
+  | 'streak_reminder'
+  | 'collective_milestone'
+  | 'kudo'
+  | 'recognition'
+  | 'moderation';
 
 export interface Group {
   id: string;
@@ -66,6 +82,11 @@ export interface Group {
   tags: string[];
   rules: string[];
   allowMemberCreation?: boolean;
+  // Experience-reference group health states
+  healthState?: 'healthy' | 'restricted' | 'flagged';
+  creationPermission?: 'open' | 'stewards_only';
+  pendingRequests?: number;
+  flaggedReason?: string;
 }
 
 export type AssumptionCategory =
@@ -115,6 +136,8 @@ export interface ParticipantContribution {
   missedYesterday?: boolean;
 }
 
+export type ChallengeStatus = 'active' | 'upcoming' | 'completed' | 'closed';
+
 export interface Challenge {
   id: string;
   title: string;
@@ -125,9 +148,16 @@ export interface Challenge {
   creatorId: string;
   creatorName: string;
   coverImage: string;
-  status: 'active' | 'upcoming' | 'completed';
+  status: ChallengeStatus;
   startDate: string;
   endDate: string;
+  // Experience-reference lifecycle extras (optional so existing mocks keep working)
+  capacity?: number;
+  isFull?: boolean;
+  isFlagged?: boolean;
+  flaggedReason?: string;
+  finalized?: boolean;
+  inviteState?: 'none' | 'invited' | 'requested' | 'expired';
   timezone: string; // e.g. "Africa/Nairobi (EAT)"
   durationDays: number;
   activities: ChallengeActivityConfig[];
@@ -187,12 +217,187 @@ export interface CommunityMoment {
   hasKudoed: boolean;
 }
 
+export type NotificationCategory =
+  | 'group_invite'
+  | 'challenge_invite'
+  | 'challenge_start'
+  | 'challenge_end'
+  | 'streak_reminder'
+  | 'collective_milestone'
+  | 'kudo'
+  | 'recognition'
+  | 'moderation'
+  | 'system'
+  // legacy aliases kept for existing mocks
+  | 'invitation'
+  | 'streak_reminder_legacy'
+  | 'target_nearing'
+  | 'kudo_legacy'
+  | 'milestone';
+
 export interface NotificationAlert {
   id: string;
   title: string;
   body: string;
   time: string;
   read: boolean;
-  type: 'invitation' | 'streak_reminder' | 'target_nearing' | 'kudo' | 'milestone';
+  type: NotificationCategory | 'invitation' | 'streak_reminder' | 'target_nearing' | 'kudo' | 'milestone';
   targetChallengeId?: string;
+  category?: NotificationCategory;
+}
+
+// ---- Operator experience-reference model (mock only, no production authority) ----
+
+export type OperatorSection =
+  | 'overview'
+  | 'users'
+  | 'groups'
+  | 'activities'
+  | 'challenges'
+  | 'templates'
+  | 'approvals'
+  | 'donations'
+  | 'content'
+  | 'access'
+  | 'health'
+  | 'audit'
+  | 'settings';
+
+export type SurfaceMode = 'member' | 'operator';
+
+export interface OperatorUserRow {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string;
+  state: 'active' | 'suspended' | 'invited' | 'inactive';
+  role: string;
+  groups: number;
+  challenges: number;
+  recognitions: number;
+  lastActive: string;
+  issue?: string;
+}
+
+export interface OperatorGroupRow {
+  id: string;
+  name: string;
+  state: 'healthy' | 'restricted' | 'flagged';
+  members: number;
+  stewards: string;
+  activeChallenges: number;
+  completedChallenges: number;
+  pendingRequests: number;
+  creationPermission: 'open' | 'stewards_only';
+  flag?: string;
+}
+
+export type ActivityLifecycle = 'draft' | 'published' | 'retired';
+export type ActivityReadiness = 'ready' | 'needs_review' | 'missing_content' | 'missing_translation';
+
+export interface OperatorActivityRow {
+  id: string;
+  code: string;
+  displayName: string;
+  domain: 'Fitness' | 'Wellness';
+  category: string;
+  lifecycle: ActivityLifecycle;
+  readiness: ActivityReadiness;
+  challengeEligible: boolean;
+  metrics: string;
+  locales: string;
+  version: string;
+  updated: string;
+}
+
+export interface OperatorChallengeRow {
+  id: string;
+  title: string;
+  group: string;
+  type: ChallengeType;
+  status: ChallengeStatus;
+  participants: number;
+  start: string;
+  end: string;
+  flagged?: string;
+  finalized: boolean;
+  resultSummary: string;
+}
+
+export type TemplateStatus = 'draft' | 'published' | 'retired';
+
+export interface OperatorTemplateRow {
+  id: string;
+  name: string;
+  type: ChallengeType;
+  status: TemplateStatus;
+  uses: number;
+  locales: string;
+  updated: string;
+  editableFields: string;
+}
+
+export interface ApprovalItem {
+  id: string;
+  kind: 'group_join' | 'challenge_creation' | 'content_publish' | 'template_publish' | 'moderation' | 'account_review' | 'donation_review' | 'localisation_gap';
+  title: string;
+  detail: string;
+  severity: 'low' | 'medium' | 'high';
+  age: string;
+  status: 'pending' | 'approved' | 'dismissed' | 'escalated';
+  mockLabel: string;
+}
+
+export interface DonationRecord {
+  id: string;
+  kind: 'tiizi_support' | 'cause_support';
+  contributor: string;
+  amount: string;
+  date: string;
+  status: 'recorded' | 'pending' | 'attention';
+  channel: string;
+  reconciliation: 'matched' | 'unmatched' | 'n/a';
+  note: string;
+}
+
+export interface LocaleCoverage {
+  locale: string;
+  label: string;
+  activities: string;
+  templates: string;
+  systemCopy: string;
+  fallback: string;
+  state: 'ready' | 'partial' | 'missing';
+}
+
+export interface AccessRoleRow {
+  role: string;
+  scope: string;
+  holders: number;
+  status: 'active' | 'review';
+  summary: string;
+  lastChange: string;
+}
+
+export interface HealthService {
+  name: string;
+  state: 'healthy' | 'degraded' | 'incident' | 'maintenance';
+  detail: string;
+  updated: string;
+}
+
+export interface AuditEntry {
+  id: string;
+  action: string;
+  actor: string;
+  where: string;
+  when: string;
+  summary: string;
+}
+
+export interface OnboardingPersonaState {
+  id: 'brand_new' | 'no_group' | 'in_group_no_challenge' | 'invited_group' | 'invited_challenge' | 'active_commitments';
+  title: string;
+  description: string;
+  nextSteps: string[];
 }
