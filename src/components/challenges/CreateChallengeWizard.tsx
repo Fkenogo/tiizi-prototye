@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Challenge,
   ChallengeType,
@@ -84,13 +84,10 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
   // Explicit affirmative creator participation (Product Truth: Creator participation must NOT be assumed)
   const [creatorWillJoin, setCreatorWillJoin] = useState<boolean>(false);
+  const appliedTemplate = useRef<string | null>(null);
 
-  if (!isOpen) return null;
-
-  const currentHostGroup = allGroups.find((g) => g.id === selectedGroupId) || activeGroup;
-
-  // Apply template helper
-  const handleApplyTemplate = (tplId: string) => {
+  // Apply template helper (function declaration so the mount effect below can call it)
+  function handleApplyTemplate(tplId: string) {
     const tpl = CHALLENGE_TEMPLATES.find((t) => t.id === tplId);
     if (!tpl) return;
 
@@ -122,7 +119,19 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
     }
 
     setStep(2);
-  };
+  }
+
+  useEffect(() => {
+    if (isOpen && initialTemplateId && appliedTemplate.current !== initialTemplateId) {
+      appliedTemplate.current = initialTemplateId;
+      handleApplyTemplate(initialTemplateId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialTemplateId]);
+
+  if (!isOpen) return null;
+
+  const currentHostGroup = allGroups.find((g) => g.id === selectedGroupId) || activeGroup;
 
   // Continuous Natural Language Preview Sentence
   const generateSummary = () => {
