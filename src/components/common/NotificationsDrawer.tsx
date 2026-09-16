@@ -68,10 +68,12 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
               {notifications.length === 0 ? (
                 <div className="text-center py-12 text-zinc-400">
                   <Bell className="w-8 h-8 mx-auto mb-2 stroke-1" />
-                  <p className="text-sm">No notifications right now</p>
+                  <p className="text-sm font-bold text-zinc-700">You are all caught up</p>
+                  <p className="text-xs mt-1">No notifications. Tiizi only alerts for meaningful accountability — group invites, challenge starts/ends, streak reminders, milestones, kudos, recognition, moderation.</p>
                 </div>
               ) : (
                 notifications.map((n) => {
+                  const cat = (n.category as string) || n.type;
                   const getIcon = () => {
                     switch (n.type) {
                       case 'streak_reminder':
@@ -86,6 +88,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                         return <Bell className="w-4 h-4 text-zinc-600" />;
                     }
                   };
+                  const catLabel = String(cat).replace(/_/g, ' ');
 
                   return (
                     <div
@@ -109,7 +112,7 @@ export const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
                             <h4 className="text-xs font-semibold text-zinc-900 truncate">
-                              {n.title}
+                              {n.title} <span className="ml-1 text-[9px] font-bold uppercase bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded">{catLabel}</span>
                             </h4>
                             <span className="text-[10px] text-zinc-400 whitespace-nowrap">
                               {n.time}

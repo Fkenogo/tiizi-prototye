@@ -66,6 +66,17 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
         </div>
       )}
 
+      {(group.healthState === 'restricted' || group.healthState === 'flagged') && (
+        <div className={`rounded-2xl border p-3.5 text-xs flex items-start gap-2 ${group.healthState === 'restricted' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            {group.healthState === 'restricted'
+              ? <><strong>Restricted group (mock):</strong> challenge creation is stewards-only{group.pendingRequests ? ` · ${group.pendingRequests} join requests pending review` : ''}. Contact {groupStewards[0]?.name || 'a steward'} to request access.</>
+              : <><strong>Under mock review:</strong> {group.flaggedReason || 'flagged for operator review (prototype).'} Roster and challenges stay readable.</>}
+          </span>
+        </div>
+      )}
+
       {/* Group Hero Banner */}
       <div className="bg-white rounded-3xl border border-zinc-200 overflow-hidden shadow-xs">
         <div className="relative h-48 sm:h-64 w-full bg-zinc-900">

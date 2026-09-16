@@ -22,6 +22,10 @@ interface ProfileDrawerProps {
   onSelectGroup: (groupId: string) => void;
   onSelectChallenge: (challengeId: string) => void;
   onOpenReferenceDrawer: () => void;
+  onOpenTemplates?: () => void;
+  onOpenSupport?: () => void;
+  onOpenFullProfile?: () => void;
+  onOpenOnboarding?: () => void;
 }
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
@@ -33,6 +37,10 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   onSelectGroup,
   onSelectChallenge,
   onOpenReferenceDrawer,
+  onOpenTemplates,
+  onOpenSupport,
+  onOpenFullProfile,
+  onOpenOnboarding,
 }) => {
   if (!isOpen) return null;
 
@@ -190,6 +198,14 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Secondary destinations (keeps primary nav uncrowded) */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {onOpenFullProfile && (<button onClick={() => { onOpenFullProfile(); onClose(); }} className="py-2 px-2 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800 font-bold text-[11px] cursor-pointer">Profile &amp; settings</button>)}
+              {onOpenOnboarding && (<button onClick={() => { onOpenOnboarding(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Onboarding guide</button>)}
+              {onOpenTemplates && (<button onClick={() => { onOpenTemplates(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Templates</button>)}
+              {onOpenSupport && (<button onClick={() => { onOpenSupport(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Support Tiizi</button>)}
             </div>
 
             {/* Persona Switch Prompt */}

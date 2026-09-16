@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Check,
+  Lock,
 } from 'lucide-react';
 import { KudoButton } from '../common/KudoButton';
 
@@ -199,6 +200,29 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
             )}
           </div>
         </div>
+
+        {/* State banners: upcoming / closed / flagged (no logging before participation) */}
+        {challenge.status === 'upcoming' && (
+          <div className="bg-sky-50 border-b border-sky-200 px-5 sm:px-6 py-3 text-xs text-sky-900 flex items-start gap-2">
+            <Calendar className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+            <span><strong>Upcoming:</strong> starts {challenge.startDate}. You can preview and join now; activity logging unlocks at start. No logging is shown before participation.</span>
+          </div>
+        )}
+        {challenge.status === 'closed' && (
+          <div className="bg-zinc-100 border-b border-zinc-200 px-5 sm:px-6 py-3 text-xs text-zinc-700 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-zinc-500 shrink-0 mt-0.5" />
+            <span><strong>Closed{challenge.isFull ? ' — capacity reached' : ''}:</strong> this window is no longer joinable{challenge.capacity ? ` (${challenge.capacity}/${challenge.capacity} prototype capacity)` : ''}. {challenge.finalized ? 'Results are finalized.' : ''}</span>
+          </div>
+        )}
+        {challenge.isFlagged && (
+          <div className="bg-amber-50 border-b border-amber-200 px-5 sm:px-6 py-3 text-xs text-amber-900 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <span><strong>Under mock review:</strong> {challenge.flaggedReason || 'flagged for operator review (prototype).'} Member view stays readable; actions may be limited.</span>
+          </div>
+        )}
+        {challenge.finalized && challenge.status !== 'completed' && (
+          <div className="bg-zinc-900 text-white px-5 sm:px-6 py-3 text-xs"><strong className="text-amber-400">Finalized:</strong> terminal state — record locked, read-only.</div>
+        )}
 
         {/* Celebratory Finalized Historic Notice */}
         {isCompleted && (

@@ -18,9 +18,11 @@ import {
   HelpCircle,
 } from 'lucide-react';
 
+export type MemberTab = 'today' | 'challenges' | 'groups' | 'catalogue' | 'templates' | 'support' | 'profile' | 'onboarding';
+
 interface HeaderProps {
-  currentTab: 'today' | 'challenges' | 'groups' | 'catalogue';
-  onSelectTab: (tab: 'today' | 'challenges' | 'groups' | 'catalogue') => void;
+  currentTab: MemberTab;
+  onSelectTab: (tab: MemberTab) => void;
   currentMember: Member;
   unreadNotificationCount: number;
   navVariant?: NavigationVariant;
