@@ -61,6 +61,7 @@ import {
   OperatorSettings,
 } from './components/operator/OperatorPlatform';
 import { ASSUMPTIONS_REGISTER } from './data/assumptionsData';
+import { buildRunAgainChallenge } from './utils/runAgain';
 
 function withGroupMeta(groups: Group[]): Group[] {
   return groups.map((g) => {
@@ -229,13 +230,10 @@ export default function App() {
   };
 
   const handleRunAgain = (oldChallenge: Challenge) => {
-    const freshChallenge: Challenge = {
-      ...oldChallenge, id: `ch-${Date.now()}`, title: `${oldChallenge.title} (Cycle 2)`,
-      status: 'active', startDate: 'Sep 15, 2026', endDate: 'Sep 29, 2026',
-      isFlagged: false, flaggedReason: undefined, finalized: false, inviteState: 'none',
-      participants: oldChallenge.participants.map((p) => ({ ...p, accumulatedValue: 0, rank: null, finished: false, daysCompleted: 0, currentStreak: 0, todayCompleted: false, todayRequirementsDone: {} })),
-      collectiveProgress: oldChallenge.type === 'collective' ? { totalAccumulated: 0, target: oldChallenge.targetValue, percent: 0, completedEarly: false } : undefined,
-    };
+    // CORR-001 product truth: completed challenge stays immutable; Run Again
+    // spawns a NEW challenge with zero participants. Prior members rejoin
+    // affirmatively via the normal Join path (or reinvite); nobody is carried over.
+    const freshChallenge = buildRunAgainChallenge(oldChallenge);
     setChallenges((prev) => [freshChallenge, ...prev]);
     setSelectedChallengeId(freshChallenge.id);
   };

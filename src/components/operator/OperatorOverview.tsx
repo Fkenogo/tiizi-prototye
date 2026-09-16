@@ -6,7 +6,7 @@ const CARDS = [
   { label: 'Suspended users', value: '6', sub: '1 appeal pending (mock)' },
   { label: 'Active Groups', value: '3', sub: '1 restricted · 1 flagged (mock)' },
   { label: 'Active Challenges', value: '4', sub: '1 upcoming · 1 closed · 1 flagged' },
-  { label: 'Pending approvals', value: '7', sub: '2 high severity (mock)' },
+  { label: 'Pending review & attention', value: '7', sub: '3 approvals · 2 reviews · 2 attention (mock)' },
   { label: 'Flagged items', value: '2', sub: '1 group · 1 challenge (mock)' },
   { label: 'Content readiness issues', value: '4', sub: '2 missing translation · 2 needs review' },
   { label: 'Failed / system alerts', value: '2', sub: 'notifications degraded · content queue (simulated)' },

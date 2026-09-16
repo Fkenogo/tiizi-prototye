@@ -71,7 +71,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             {group.healthState === 'restricted'
-              ? <><strong>Restricted group (mock):</strong> challenge creation is stewards-only{group.pendingRequests ? ` · ${group.pendingRequests} join requests pending review` : ''}. Contact {groupStewards[0]?.name || 'a steward'} to request access.</>
+              ? <><strong>Restricted group (mock rule):</strong> this group restricts challenge creation to stewards — the exception to the open-by-default rule{group.pendingRequests ? ` · ${group.pendingRequests} join requests pending review` : ''}. Contact {groupStewards[0]?.name || 'a steward'} to request access.</>
               : <><strong>Under mock review:</strong> {group.flaggedReason || 'flagged for operator review (prototype).'} Roster and challenges stay readable.</>}
           </span>
         </div>
@@ -168,7 +168,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
             ) : (
               <div
                 className="px-3.5 py-2 bg-zinc-100 border border-zinc-200 text-zinc-500 font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-not-allowed"
-                title="Only designated group stewards may initiate challenges in this club"
+                title="This group's rule restricts creation to stewards. Default in other groups: any member may create."
               >
                 <Lock className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Steward-Curated Challenges</span>

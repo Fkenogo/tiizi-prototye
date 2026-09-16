@@ -7,7 +7,7 @@ export const OperatorGroups: React.FC = () => {
   return (
     <div className="space-y-4">
       <div><h1 className="text-xl sm:text-2xl font-black tracking-tight">Groups</h1>
-      <p className="text-xs text-zinc-500">Inspect state, stewards, members, challenges, rules, reports, creation permissions, history. Operator never silently edits group truth — every change is a mock audited action.</p></div>
+      <p className="text-xs text-zinc-500">Operational-control scope: inspect state, stewards, members, challenges, rules, reports, creation permissions, history. Suspend/reactivate are mock content-management actions — they require confirmation, write to the Audit Log, and depend on role permission. Operator never silently edits group truth.</p></div>
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search groups..." className="w-full px-3 py-2 text-xs bg-white border border-zinc-200 rounded-xl" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {rows.map((g) => (
@@ -27,8 +27,8 @@ export const OperatorGroups: React.FC = () => {
               <button className="flex-1 px-2 py-1.5 bg-zinc-100 text-[11px] font-bold rounded-lg cursor-pointer">History (mock)</button>
             </div>
             <div className="flex gap-1.5">
-              <button className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Suspend (mock)</button>
-              <button className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Reactivate (mock)</button>
+              <button title="Intent: pause group visibility pending review. Requires confirm; writes to Audit Log; permission-dependent." className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Suspend (mock · confirm → audit)</button>
+              <button title="Intent: restore group after review. Requires confirm; writes to Audit Log; permission-dependent." className="flex-1 px-2 py-1.5 bg-white border border-zinc-200 text-[11px] font-bold rounded-lg cursor-pointer">Reactivate (mock · confirm → audit)</button>
             </div>
           </div>
         ))}

@@ -284,10 +284,10 @@ export const ChallengeCard: React.FC<ChallengeCardProps> = ({
                   if (onRunAgain) onRunAgain(challenge);
                 }}
                 className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 px-2.5 py-1 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors cursor-pointer"
-                title="Spawn a new cycle of this challenge"
+                title="Creates a new challenge with the same setup. New cycle starts with 0 participants — rejoin affirmatively."
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>Run Again</span>
+                <span>Run Again · new cycle (0 joined)</span>
               </button>
             ) : isParticipant ? (
               <button

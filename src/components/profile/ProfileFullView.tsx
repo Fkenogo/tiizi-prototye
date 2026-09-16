@@ -43,7 +43,8 @@ export const ProfileFullView: React.FC<{ member: Member; groups: Group[]; challe
             <div className="mt-3 space-y-1.5">{myChallenges.map((c) => (<div key={c.id} className="text-xs p-2.5 bg-zinc-50 border border-zinc-100 rounded-xl"><span className="font-bold">{c.title}</span> <span className="text-zinc-500">· {c.groupName} · {c.type} · {c.status}</span></div>))}</div>
           </div>
           <div className="bg-white rounded-2xl border border-amber-200 p-5">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5"><Award className="w-3.5 h-3.5" /> Platform Recognition (system-issued, governed)</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5"><Award className="w-3.5 h-3.5" /> Platform Recognition (policy-qualified — not automatic)</h3>
+            <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">Challenge Engine → Derived Truth → Platform Policy → Recognition record. Not every governed outcome qualifies. Kudos are separate peer encouragement and never count as Recognition.</p>
             <div className="mt-2 space-y-2">{(member.recognitions ?? []).map((r) => (<div key={r.id} className="p-3 bg-amber-50/60 border border-amber-200/60 rounded-xl text-xs"><p className="font-bold text-zinc-900">{r.title}</p><p className="text-zinc-600">{r.summary}</p><p className="text-[11px] text-zinc-500 mt-1">{r.challengeTitle} · {r.issuedAt} · {r.governedProof}</p></div>))}
               {(!member.recognitions || member.recognitions.length === 0) && <p className="text-xs text-zinc-500">No recognitions yet. Kudos from peers appear in the community feed, not here.</p>}</div>
           </div>

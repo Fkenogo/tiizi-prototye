@@ -22,7 +22,7 @@ export const CURRENT_USER_AMINA: Member = {
       issuedAt: 'Aug 28, 2026',
       tier: 'podium',
       summary: 'Completed 100 km qualifying distance within the governed competition window.',
-      governedProof: 'Standard Competition Rank #2 • Verified by Nairobi Morning Movers',
+      governedProof: 'Standard Competition Rank #2 • Recorded by Nairobi Morning Movers (mock record)',
     },
     {
       id: 'rec-2',
@@ -31,7 +31,7 @@ export const CURRENT_USER_AMINA: Member = {
       issuedAt: 'Jul 31, 2026',
       tier: 'consistency_master',
       summary: 'Logged 30 unbroken consecutive days without streak failure.',
-      governedProof: 'Full 30-Day Calendar Attested • Nairobi Timezone',
+      governedProof: 'Full 30-Day Calendar • Nairobi Timezone (mock record)',
     },
   ],
 };
@@ -53,12 +53,12 @@ export const STEWARD_WANJIKU: Member = {
   recognitions: [
     {
       id: 'rec-3',
-      title: 'Founding Group Steward Credential',
+      title: 'Founding Group Steward Recognition',
       challengeTitle: 'Community Stewardship Governance',
       issuedAt: 'Oct 15, 2025',
       tier: 'completed',
-      summary: 'Verified community leader and circle steward for Nairobi Morning Movers.',
-      governedProof: 'Charter Steward Verification #001',
+      summary: 'Recorded community steward role for Nairobi Morning Movers (policy-qualified mock record).',
+      governedProof: 'Steward role record #001 (mock — not a verified credential)',
     },
   ],
 };
@@ -107,12 +107,12 @@ export const MEMBER_DAVID: Member = {
   recognitions: [
     {
       id: 'rec-5',
-      title: 'Habit Re-ignition Certificate',
+      title: 'Habit Re-ignition Recognition',
       challengeTitle: 'September 30-Day Morning Movement',
       issuedAt: 'Sep 12, 2026',
       tier: 'completed',
       summary: 'Successfully restarted consecutive movement chain and achieved cumulative consistency record.',
-      governedProof: 'Cumulative 18-Day Total Preserved Record',
+      governedProof: 'Cumulative 18-Day Total Preserved Record (mock)',
     },
   ],
 };
@@ -955,8 +955,8 @@ export const EXTENDED_NOTIFICATIONS: NotificationAlert[] = [
   { id: 'notif-invite-group', title: 'Group invitation: Zenith Mind & Motion', body: 'Wanjiku invited you to join Zenith Mind & Motion. Invitation expires in 6 days (prototype).', time: '1 hour ago', read: false, type: 'invitation', category: 'group_invite' },
   { id: 'notif-invite-challenge', title: 'Challenge invitation: Sunrise 5K Prep Week', body: 'You are invited to join Sunrise 5K Prep Week starting Oct 1. Preview before joining.', time: '3 hours ago', read: false, type: 'invitation', category: 'challenge_invite' },
   { id: 'notif-start', title: 'Challenge starts tomorrow', body: 'Sunrise 5K Prep Week starts tomorrow in Africa/Nairobi (EAT).', time: 'Yesterday', read: true, type: 'milestone', category: 'challenge_start' },
-  { id: 'notif-end', title: 'Challenge ended: Karura Forest 250k Sprint', body: 'Final results are locked. View your retrospective and system recognition.', time: 'Aug 15, 2026', read: true, type: 'milestone', category: 'challenge_end' },
-  { id: 'notif-recognition', title: 'Platform Recognition issued', body: '30-Day Consecutive Consistency Master was issued to your profile (system-governed).', time: 'Jul 31, 2026', read: true, type: 'milestone', category: 'recognition' },
+  { id: 'notif-end', title: 'Challenge ended: Karura Forest 250k Sprint', body: 'Final results are locked. View your retrospective and any policy-qualified Platform Recognition.', time: 'Aug 15, 2026', read: true, type: 'milestone', category: 'challenge_end' },
+  { id: 'notif-recognition', title: 'Platform Recognition recorded', body: '30-Day Consecutive Consistency record was added to your profile where Platform Policy qualified it (mock record — not a verified credential).', time: 'Jul 31, 2026', read: true, type: 'milestone', category: 'recognition' },
   { id: 'notif-moderation', title: 'System message: content under review', body: 'A challenge you follow is under mock moderation review. No action needed.', time: '2 days ago', read: true, type: 'milestone', category: 'moderation' },
 ];
 

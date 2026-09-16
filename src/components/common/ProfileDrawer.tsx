@@ -129,17 +129,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               </div>
             </div>
 
-            {/* Governed System Recognitions (System Credentials vs Community Kudos) */}
+            {/* Policy-qualified Platform Recognition (records, not credentials; distinct from community Kudos) */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
                   <Award className="w-3.5 h-3.5 text-amber-500" />
-                  <span>System Recognitions</span>
+                  <span>Platform Recognition</span>
                 </h4>
                 <span className="text-[10px] font-semibold text-zinc-400">
-                  Permanent Credentials
+                  Policy-qualified records
                 </span>
               </div>
+              <p className="text-[10px] text-zinc-500 leading-relaxed">Not automatic: only Derived Truth that meets Platform Policy is recorded here. Kudos from peers appear in the community feed, not here.</p>
 
               {currentMember.recognitions && currentMember.recognitions.length > 0 ? (
                 <div className="space-y-2">
@@ -166,7 +167,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 </div>
               ) : (
                 <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center text-xs text-zinc-500">
-                  Complete challenges to earn verified system recognitions.
+                  No recognition records yet. Some governed outcomes may qualify under Tiizi policy — Kudos are separate peer encouragement.
                 </div>
               )}
             </div>

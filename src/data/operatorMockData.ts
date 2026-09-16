@@ -75,20 +75,20 @@ export const OPERATOR_TEMPLATES: OperatorTemplateRow[] = [
 ];
 
 export const APPROVALS_QUEUE: ApprovalItem[] = [
-  { id: 'ap-1', kind: 'group_join', title: '5 join requests — Kilimani Endurance Club', detail: 'Restricted group (stewards_only). Oldest request 4 days ago.', severity: 'medium', age: '4d', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-2', kind: 'content_publish', title: 'Plank needs review', detail: 'Missing Swahili translation; safety guidance updated in draft.', severity: 'medium', age: '2d', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-3', kind: 'template_publish', title: 'Push-Up & Plank Consistency (draft → publish)', detail: 'Draft template awaiting content sign-off.', severity: 'low', age: '1d', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-4', kind: 'moderation', title: 'Reported challenge: Midnight Ultra', detail: '2 member reports: unrealistic target pairing (mock).', severity: 'high', age: '6h', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-5', kind: 'account_review', title: 'Suspended account appeal: Brian O.', detail: 'Appeal message attached (mock). Review accuracy logs.', severity: 'high', age: '3h', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-6', kind: 'localisation_gap', title: 'Swahili gaps: 3 activities', detail: 'Side Plank, Plank, Meditation missing sw copy.', severity: 'low', age: '5d', status: 'pending', mockLabel: 'Mock approval type' },
-  { id: 'ap-7', kind: 'donation_review', title: 'Unmatched cause record (mock)', detail: 'KES 1,000 cause pledge without matched movement log.', severity: 'medium', age: '1d', status: 'pending', mockLabel: 'Mock approval type' },
+  { id: 'ap-1', kind: 'group_join', title: '5 join requests — Kilimani Endurance Club', detail: 'Restricted group (stewards_only rule). Oldest request 4 days ago.', severity: 'medium', age: '4d', status: 'pending', mockLabel: 'Mock approval' },
+  { id: 'ap-2', kind: 'content_publish', title: 'Plank needs review', detail: 'Missing Swahili translation; safety guidance updated in draft.', severity: 'medium', age: '2d', status: 'pending', mockLabel: 'Mock approval' },
+  { id: 'ap-3', kind: 'template_publish', title: 'Push-Up & Plank Consistency (draft → publish)', detail: 'Draft template awaiting content sign-off.', severity: 'low', age: '1d', status: 'pending', mockLabel: 'Mock approval' },
+  { id: 'ap-4', kind: 'moderation', title: 'Reported challenge: Midnight Ultra', detail: '2 member reports: unrealistic target pairing (mock).', severity: 'high', age: '6h', status: 'pending', mockLabel: 'Mock review' },
+  { id: 'ap-5', kind: 'account_review', title: 'Suspended account appeal: Brian O.', detail: 'Appeal message attached (mock). Review accuracy logs.', severity: 'high', age: '3h', status: 'pending', mockLabel: 'Mock review' },
+  { id: 'ap-6', kind: 'localisation_gap', title: 'Swahili gaps: 3 activities', detail: 'Side Plank, Plank, Meditation missing sw copy.', severity: 'low', age: '5d', status: 'pending', mockLabel: 'Mock attention' },
+  { id: 'ap-7', kind: 'donation_review', title: 'Unmatched cause record (mock)', detail: 'KES 1,000 self-reported external cause pledge without matched movement log. Tiizi holds no funds.', severity: 'medium', age: '1d', status: 'pending', mockLabel: 'Mock attention' },
 ];
 
 export const DONATION_RECORDS: DonationRecord[] = [
   { id: 'don-1', kind: 'tiizi_support', contributor: 'Amina O.', amount: 'KES 500', date: 'Sep 2, 2026', status: 'recorded', channel: 'M-Pesa (mock)', reconciliation: 'n/a', note: 'Prototype record only. Tiizi support is not custodial charity processing.' },
   { id: 'don-2', kind: 'tiizi_support', contributor: 'Anonymous (mock)', amount: 'KES 1,000', date: 'Aug 28, 2026', status: 'recorded', channel: 'Card (mock)', reconciliation: 'n/a', note: 'Prototype record only.' },
   { id: 'don-3', kind: 'cause_support', contributor: 'Nairobi Morning Movers', amount: '438 km dedicated', date: 'Sep 15, 2026', status: 'recorded', channel: 'Movement pledge', reconciliation: 'matched', note: 'Dedication to City Parks awareness. No funds held by Tiizi.' },
-  { id: 'don-4', kind: 'cause_support', contributor: 'Eric M. (mock)', amount: 'KES 1,000 pledged', date: 'Sep 13, 2026', status: 'attention', channel: 'External pledge', reconciliation: 'unmatched', note: 'Mock reconciliation issue: no matched movement log.' },
+  { id: 'don-4', kind: 'cause_support', contributor: 'Eric M. (mock)', amount: 'KES 1,000 self-reported pledge', date: 'Sep 13, 2026', status: 'attention', channel: 'External pledge (self-reported)', reconciliation: 'unmatched', note: 'Self/community-reported only; fulfilled outside Tiizi. Tiizi holds no funds and verifies no totals.' },
 ];
 
 export const LOCALE_COVERAGE: LocaleCoverage[] = [

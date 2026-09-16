@@ -9,7 +9,7 @@ const NAV: { id: OperatorSection; label: string; icon: React.ReactNode }[] = [
   { id: 'activities', label: 'Activities & Knowledge', icon: <Dumbbell className="w-4 h-4" /> },
   { id: 'challenges', label: 'Challenges', icon: <Trophy className="w-4 h-4" /> },
   { id: 'templates', label: 'Templates', icon: <LayoutTemplate className="w-4 h-4" /> },
-  { id: 'approvals', label: 'Approvals', icon: <Inbox className="w-4 h-4" /> },
+  { id: 'approvals', label: 'Review & Attention', icon: <Inbox className="w-4 h-4" /> },
   { id: 'donations', label: 'Donations / Support', icon: <HeartHandshake className="w-4 h-4" /> },
   { id: 'content', label: 'Content & Localisation', icon: <Languages className="w-4 h-4" /> },
   { id: 'access', label: 'Access & Roles', icon: <KeyRound className="w-4 h-4" /> },
@@ -41,7 +41,7 @@ export const OperatorShell: React.FC<{ section: OperatorSection; onNavigate: (s:
       </nav>
       <div className="hidden lg:block mt-auto p-4 border-t border-zinc-800">
         <button onClick={onExitToMember} className="w-full px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-xs font-bold rounded-xl cursor-pointer">← Exit to Member experience</button>
-        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Professional console, not a consumer feed. All actions mock with audit trail.</p>
+        <p className="text-[10px] text-zinc-500 mt-2 leading-relaxed">Support / operational / content / review controls are mock: each states intent, needs confirmation, writes to the Audit Log, and depends on role permission. Some controls are future-authority hypotheses — see Assumptions Register.</p>
       </div>
     </aside>
     <div className="min-w-0">

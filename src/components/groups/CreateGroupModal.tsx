@@ -128,6 +128,7 @@ export const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             <div>
               <span className="font-bold text-zinc-800">You will become Group Steward.</span>{' '}
               You will be able to manage group settings, invite members, and launch challenges.
+              <span className="block mt-1 text-zinc-500">Default: any group member may create challenges unless the group later adopts a rule restricting it.</span>
             </div>
           </div>
 

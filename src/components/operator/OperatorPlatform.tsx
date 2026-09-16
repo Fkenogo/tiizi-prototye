@@ -4,7 +4,7 @@ import { DONATION_RECORDS, LOCALE_COVERAGE, ACCESS_ROLES, PLATFORM_HEALTH, HEALT
 export const OperatorDonations: React.FC = () => (
   <div className="space-y-4">
     <div><h1 className="text-xl sm:text-2xl font-black tracking-tight">Donations / Support</h1>
-    <p className="text-xs text-zinc-500">A. Support Tiizi vs B. Community Cause support — strictly separated. No custodial charity processing is implied.</p></div>
+    <p className="text-xs text-zinc-500">A. Support Tiizi (platform-support mock records) vs B. Community Cause support (movement dedications + self-reported external pledges) — strictly separated. Tiizi holds no charitable funds, verifies no totals, shows no “Amount Raised”, and implies no custody or escrow.</p></div>
     {(['tiizi_support', 'cause_support'] as const).map((kind) => (
       <div key={kind} className="bg-white rounded-2xl border border-zinc-200 p-4">
         <h2 className="font-extrabold text-sm">{kind === 'tiizi_support' ? 'A. Support Tiizi contributions (mock records)' : 'B. Community Cause support (mock records)'}</h2>

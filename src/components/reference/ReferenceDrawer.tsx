@@ -321,7 +321,7 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <ShieldAlert className="w-4 h-4 text-amber-400" />
-                    <span>Governed Assumptions Register (10)</span>
+                    <span>Governed Assumptions Register (16)</span>
                   </div>
                   <ExternalLink className="w-4 h-4 text-amber-400" />
                 </button>

@@ -102,6 +102,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
           {isCompleted && onRunAgain && (
             <button
               onClick={() => onRunAgain(challenge)}
+              title="Creates a new challenge with the same configuration. Starts with 0 participants — previous members rejoin affirmatively."
               className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg border border-orange-200 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -231,15 +232,17 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
               <Award className="w-4 h-4 text-amber-400 shrink-0" />
               <span>
                 <strong className="text-amber-400">Historical Archive:</strong> This challenge window has concluded. All participant milestones are finalized and permanently preserved.
+                <span className="block text-zinc-300 mt-1 font-normal">Run Again creates a new challenge with the same setup and <strong className="text-white">0 participants</strong> — previous members are not carried over. Rejoin or reinvite affirmatively.</span>
               </span>
             </div>
             {onRunAgain && (
               <button
                 onClick={() => onRunAgain(challenge)}
+                title="New cycle starts empty; previous participants rejoin via Join / invite."
                 className="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer self-start sm:self-auto shrink-0"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Run Again (Spawn New Cycle)</span>
+                <span>Run Again (New cycle · 0 participants)</span>
               </button>
             )}
           </div>
@@ -258,7 +261,7 @@ export const ChallengeDetailView: React.FC<ChallengeDetailViewProps> = ({
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold">Social Cause Awareness: </span>
-                {challenge.causeName}. Community participation raises awareness and collective solidarity.
+                {challenge.causeName}. Community participation raises awareness and collective solidarity. Tiizi holds no funds; any external pledge is self-reported and fulfilled outside Tiizi — no Amount Raised shown.
               </div>
             </div>
           )}

@@ -29,8 +29,8 @@ export const SupportView: React.FC = () => {
       ) : (
         <div className="bg-emerald-50/60 rounded-2xl border border-emerald-200 p-5 sm:p-6 space-y-3">
           <h2 className="font-extrabold text-sm text-emerald-950">Dedicate movement to a cause (not money custody)</h2>
-          <p className="text-xs text-emerald-900 leading-relaxed">Challenges may dedicate kilometres or days to awareness (e.g. City Parks Preservation Initiative). External sponsor pledges are self-reported and fulfilled outside Tiizi.</p>
-          <div className="p-3 bg-white rounded-xl border border-emerald-200 text-xs text-emerald-900">Tiizi does <strong>not</strong> hold charitable funds, verify donation totals, or escrow pledges in this reference.</div>
+          <p className="text-xs text-emerald-900 leading-relaxed">Challenges may dedicate kilometres or days to awareness (e.g. City Parks Preservation Initiative). External sponsor pledges are self/community-reported and fulfilled outside Tiizi.</p>
+          <div className="p-3 bg-white rounded-xl border border-emerald-200 text-xs text-emerald-900">Tiizi does <strong>not</strong> hold charitable funds, verify donation totals, or escrow pledges in this reference. No “Amount Raised” totals are shown — only dedicated movement and self-reported pledge notes.</div>
         </div>
       )}
       <div className="bg-white rounded-2xl border border-zinc-200 p-5">
