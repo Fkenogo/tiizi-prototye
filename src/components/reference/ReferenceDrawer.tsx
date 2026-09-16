@@ -29,6 +29,14 @@ interface ReferenceDrawerProps {
   onOpenAssumptionsRegister?: () => void;
   onToggleExceededState: () => void;
   targetExceeded: boolean;
+  surface: 'member' | 'operator';
+  onSwitchSurface: (s: 'member' | 'operator') => void;
+  navVariant: 'variant_a' | 'variant_b';
+  onSwitchNavVariant: (v: 'variant_a' | 'variant_b') => void;
+  simulateIncident: boolean;
+  onToggleIncident: () => void;
+  onboardingState: string;
+  onSelectOnboardingState: (id: string) => void;
 }
 
 export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
@@ -41,6 +49,14 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
   onOpenAssumptionsRegister,
   onToggleExceededState,
   targetExceeded,
+  surface,
+  onSwitchSurface,
+  navVariant,
+  onSwitchNavVariant,
+  simulateIncident,
+  onToggleIncident,
+  onboardingState,
+  onSelectOnboardingState,
 }) => {
   if (!isOpen) return null;
 
@@ -81,6 +97,30 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
       description: 'Governed activity ontology with canonical metrics, units, and form guidance.',
       badge: 'Knowledge',
     },
+    {
+      id: 'journey-onboarding',
+      title: 'Journey 7: Onboarding states',
+      description: 'Brand-new → no group → invited → active commitments. No forced setup.',
+      badge: 'Onboarding',
+    },
+    {
+      id: 'journey-templates',
+      title: 'Journey 8: Template gallery',
+      description: 'Browse, preview, and use pre-filled configurations via the same Wizard.',
+      badge: 'Templates',
+    },
+    {
+      id: 'journey-support',
+      title: 'Journey 9: Support Tiizi & causes',
+      description: 'Separated Tiizi support vs community cause dedication (mock).',
+      badge: 'Support',
+    },
+    {
+      id: 'journey-operator',
+      title: 'Journey 10: Operator console',
+      description: 'Switch surface to the Tiizi Operator experience (mock).',
+      badge: 'Operator',
+    },
   ];
 
   return (
@@ -120,6 +160,31 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
 
           {/* Drawer Body */}
           <div className="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
+            {/* Section 0: Surface switch — Member vs Operator (never contaminates product UI) */}
+            <div className="space-y-2 p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/40">
+              <span className="font-bold uppercase tracking-wider text-orange-300 text-[11px]">Reference Mode · Surface</span>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button onClick={() => { onSwitchSurface('member'); }} className={`px-3 py-2 rounded-lg font-bold cursor-pointer ${surface === 'member' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>Member Experience</button>
+                <button onClick={() => { onSwitchSurface('operator'); }} className={`px-3 py-2 rounded-lg font-bold cursor-pointer ${surface === 'operator' ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}`}>Tiizi Operator</button>
+              </div>
+              <p className="text-[10px] text-zinc-400">Two coherent surfaces, one system. Admin controls never appear in consumer screens.</p>
+              <div className="pt-1">
+                <span className="font-bold uppercase tracking-wider text-zinc-400 text-[10px]">Navigation variant</span>
+                <div className="grid grid-cols-2 gap-1.5 mt-1">
+                  <button onClick={() => onSwitchNavVariant('variant_b')} className={`px-2 py-1.5 rounded-lg font-bold cursor-pointer ${navVariant === 'variant_b' ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-zinc-400'}`}>B: Today/Chal/Groups (default)</button>
+                  <button onClick={() => onSwitchNavVariant('variant_a')} className={`px-2 py-1.5 rounded-lg font-bold cursor-pointer ${navVariant === 'variant_a' ? 'bg-white text-zinc-900' : 'bg-zinc-800 text-zinc-400'}`}>A: + Activities tab</button>
+                </div>
+              </div>
+              <div className="pt-1">
+                <span className="font-bold uppercase tracking-wider text-zinc-400 text-[10px]">Onboarding preview state</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {['brand_new', 'no_group', 'in_group_no_challenge', 'invited_group', 'invited_challenge', 'active_commitments'].map((id) => (
+                    <button key={id} onClick={() => onSelectOnboardingState(id)} className={`px-2 py-1 rounded-md text-[10px] font-bold cursor-pointer ${onboardingState === id ? 'bg-emerald-600 text-white' : 'bg-zinc-800 text-zinc-400'}`}>{id.replace(/_/g, ' ')}</button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={onToggleIncident} className={`w-full mt-1 px-3 py-1.5 rounded-lg font-bold cursor-pointer ${simulateIncident ? 'bg-rose-600 text-white' : 'bg-zinc-800 text-zinc-300'}`}>{simulateIncident ? 'Health simulation: INCIDENT on API (on)' : 'Health simulation: incident (off)'}</button>
+            </div>
             {/* Section 1: Persona Switcher */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -256,7 +321,7 @@ export const ReferenceDrawer: React.FC<ReferenceDrawerProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <ShieldAlert className="w-4 h-4 text-amber-400" />
-                    <span>Governed Assumptions Register (10)</span>
+                    <span>Governed Assumptions Register (16)</span>
                   </div>
                   <ExternalLink className="w-4 h-4 text-amber-400" />
                 </button>

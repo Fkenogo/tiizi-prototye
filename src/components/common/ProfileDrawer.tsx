@@ -22,6 +22,10 @@ interface ProfileDrawerProps {
   onSelectGroup: (groupId: string) => void;
   onSelectChallenge: (challengeId: string) => void;
   onOpenReferenceDrawer: () => void;
+  onOpenTemplates?: () => void;
+  onOpenSupport?: () => void;
+  onOpenFullProfile?: () => void;
+  onOpenOnboarding?: () => void;
 }
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
@@ -33,6 +37,10 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   onSelectGroup,
   onSelectChallenge,
   onOpenReferenceDrawer,
+  onOpenTemplates,
+  onOpenSupport,
+  onOpenFullProfile,
+  onOpenOnboarding,
 }) => {
   if (!isOpen) return null;
 
@@ -93,7 +101,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               {currentMember.bio}
             </p>
 
-            {/* Governed Stats */}
+            {/* Member stats */}
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="p-3 bg-orange-50/60 rounded-xl border border-orange-100">
                 <span className="text-lg font-black text-orange-600 block">
@@ -121,17 +129,18 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               </div>
             </div>
 
-            {/* Governed System Recognitions (System Credentials vs Community Kudos) */}
+            {/* Recognition (member wording stays plain; the rules live in the reference layer) */}
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
                   <Award className="w-3.5 h-3.5 text-amber-500" />
-                  <span>System Recognitions</span>
+                  <span>Recognition</span>
                 </h4>
                 <span className="text-[10px] font-semibold text-zinc-400">
-                  Permanent Credentials
+                  Earned achievements
                 </span>
               </div>
+              <p className="text-[10px] text-zinc-500 leading-relaxed">Earned after completing challenges. Cheers from friends (Kudos) appear in the feed, not here.</p>
 
               {currentMember.recognitions && currentMember.recognitions.length > 0 ? (
                 <div className="space-y-2">
@@ -158,7 +167,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 </div>
               ) : (
                 <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-200 text-center text-xs text-zinc-500">
-                  Complete challenges to earn verified system recognitions.
+                  Nothing here yet. Finish a challenge and your achievements will appear here.
                 </div>
               )}
             </div>
@@ -190,6 +199,14 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Secondary destinations (keeps primary nav uncrowded) */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {onOpenFullProfile && (<button onClick={() => { onOpenFullProfile(); onClose(); }} className="py-2 px-2 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-800 font-bold text-[11px] cursor-pointer">Profile &amp; settings</button>)}
+              {onOpenOnboarding && (<button onClick={() => { onOpenOnboarding(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Onboarding guide</button>)}
+              {onOpenTemplates && (<button onClick={() => { onOpenTemplates(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Templates</button>)}
+              {onOpenSupport && (<button onClick={() => { onOpenSupport(); onClose(); }} className="py-2 px-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold text-[11px] cursor-pointer">Support Tiizi</button>)}
             </div>
 
             {/* Persona Switch Prompt */}

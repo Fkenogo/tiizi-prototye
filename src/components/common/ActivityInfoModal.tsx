@@ -86,7 +86,7 @@ export const ActivityInfoModal: React.FC<ActivityInfoModalProps> = ({
           <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700 flex items-center gap-1.5">
               <Layers className="w-4 h-4 text-orange-600" />
-              <span>Governed Metrics & Units</span>
+              <span>How progress is measured</span>
             </h3>
             <div className="space-y-1 text-xs">
               {activity.supportedMetrics.map((m) => (
@@ -115,7 +115,7 @@ export const ActivityInfoModal: React.FC<ActivityInfoModalProps> = ({
         {/* Footer */}
         <div className="p-4 border-t border-zinc-100 bg-white flex items-center justify-between">
           <span className="text-[11px] text-zinc-400">
-            Canonical Tiizi Knowledge Base
+            Tiizi Activity Guide
           </span>
 
           <div className="flex items-center gap-2">

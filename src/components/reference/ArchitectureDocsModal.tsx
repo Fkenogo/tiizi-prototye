@@ -274,7 +274,7 @@ export const ArchitectureDocsModal: React.FC<ArchitectureDocsModalProps> = ({
                 { id: 'H', name: 'Collective Progress & Over-100% Target', desc: 'Real-time accumulation bar that can exceed 100%.' },
                 { id: 'I', name: 'Competitive Standings & Finish Order', desc: 'Standard competition ranking with tied podium spots.' },
                 { id: 'J', name: 'Streak Participation & Reset Demonstration', desc: 'Demonstrates active streak vs David Mwangi missed-yesterday reset.' },
-                { id: 'K', name: 'Challenge Completion & Run Again', desc: 'Stable historical results and 1-tap re-launch capability.' },
+                { id: 'K', name: 'Challenge Completion & Run Again', desc: 'Immutable historical results; Run Again spawns a new cycle with the same setup and 0 participants (rejoin affirmatively).' },
                 { id: 'L', name: 'Community Moments & Kudos', desc: 'Lightweight social encouragement without social media clutter.' },
               ].map((j) => (
                 <div key={j.id} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-3">

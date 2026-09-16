@@ -1,4 +1,4 @@
-import { Group, Member, Challenge, ActivitySubmission, CommunityMoment, NotificationAlert } from '../types';
+import { Group, Member, Challenge, ActivitySubmission, CommunityMoment, NotificationAlert, GroupCharter, GroupCouncil } from '../types';
 
 export const CURRENT_USER_AMINA: Member = {
   id: 'user-amina',
@@ -22,7 +22,7 @@ export const CURRENT_USER_AMINA: Member = {
       issuedAt: 'Aug 28, 2026',
       tier: 'podium',
       summary: 'Completed 100 km qualifying distance within the governed competition window.',
-      governedProof: 'Standard Competition Rank #2 • Verified by Nairobi Morning Movers',
+      governedProof: 'Standard Competition Rank #2 • Recorded by Nairobi Morning Movers (mock record)',
     },
     {
       id: 'rec-2',
@@ -31,7 +31,7 @@ export const CURRENT_USER_AMINA: Member = {
       issuedAt: 'Jul 31, 2026',
       tier: 'consistency_master',
       summary: 'Logged 30 unbroken consecutive days without streak failure.',
-      governedProof: 'Full 30-Day Calendar Attested • Nairobi Timezone',
+      governedProof: 'Full 30-Day Calendar • Nairobi Timezone (mock record)',
     },
   ],
 };
@@ -53,12 +53,12 @@ export const STEWARD_WANJIKU: Member = {
   recognitions: [
     {
       id: 'rec-3',
-      title: 'Founding Group Steward Credential',
+      title: 'Founding Group Steward Recognition',
       challengeTitle: 'Community Stewardship Governance',
       issuedAt: 'Oct 15, 2025',
       tier: 'completed',
-      summary: 'Verified community leader and circle steward for Nairobi Morning Movers.',
-      governedProof: 'Charter Steward Verification #001',
+      summary: 'Recorded community steward role for Nairobi Morning Movers (policy-qualified mock record).',
+      governedProof: 'Steward role record #001 (mock — not a verified credential)',
     },
   ],
 };
@@ -107,12 +107,12 @@ export const MEMBER_DAVID: Member = {
   recognitions: [
     {
       id: 'rec-5',
-      title: 'Habit Re-ignition Certificate',
+      title: 'Habit Re-ignition Recognition',
       challengeTitle: 'September 30-Day Morning Movement',
       issuedAt: 'Sep 12, 2026',
       tier: 'completed',
       summary: 'Successfully restarted consecutive movement chain and achieved cumulative consistency record.',
-      governedProof: 'Cumulative 18-Day Total Preserved Record',
+      governedProof: 'Cumulative 18-Day Total Preserved Record (mock)',
     },
   ],
 };
@@ -226,6 +226,15 @@ export const INITIAL_CHALLENGES: Challenge[] = [
     summarySentence: 'Everyone in Nairobi Morning Movers contributes toward 500 km of Walking over 14 days.',
     isCause: true,
     causeName: 'City Parks Preservation Initiative (Community Awareness)',
+    // Optional challenge-linked voluntary Support Tiizi: off-by-default
+    // concept, enabled here as the prototype example. Never required.
+    supportTiizi: {
+      enabled: true,
+      suggestedAmounts: [1, 2, 5],
+      allowCustom: true,
+      offerWhen: 'both',
+      currency: '$',
+    },
     participants: [
       {
         memberId: 'user-amina',
@@ -832,6 +841,232 @@ export const INITIAL_NOTIFICATIONS: NotificationAlert[] = [
     type: 'kudo',
     targetChallengeId: 'ch-walk-nairobi',
   },
+];
+
+export const EXTENDED_MEMBERS = [
+  {
+    id: 'user-suspended-sample',
+    name: 'Brian Otieno (suspended sample)',
+    handle: '@brian_o',
+    avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80',
+    location: 'Nairobi, Kenya',
+    bio: 'Prototype-only suspended member used to demonstrate restricted states.',
+    role: 'member' as const,
+    joinedDate: 'Mar 2026',
+    stats: { challengesCompleted: 2, currentActiveCount: 0, kudosReceived: 11 },
+    accountState: 'suspended' as const,
+  },
+  {
+    id: 'user-invited-sample',
+    name: 'Faith Njeri (invited sample)',
+    handle: '@faith_n',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
+    location: 'Invite pending',
+    bio: 'Prototype-only invited member. Has not accepted the group invitation yet.',
+    role: 'member' as const,
+    joinedDate: 'Invited Sep 2026',
+    stats: { challengesCompleted: 0, currentActiveCount: 0, kudosReceived: 0 },
+    accountState: 'invited' as const,
+  },
+  {
+    id: 'user-inactive-sample',
+    name: 'Peter Kamau (inactive sample)',
+    handle: '@peter_k',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
+    location: 'Nakuru, Kenya',
+    bio: 'Prototype-only inactive member with no recent participation.',
+    role: 'member' as const,
+    joinedDate: 'Dec 2025',
+    stats: { challengesCompleted: 1, currentActiveCount: 0, kudosReceived: 4 },
+    accountState: 'inactive' as const,
+  },
+];
+
+export const EXTENDED_GROUPS_META: Record<string, { healthState: 'healthy' | 'restricted' | 'flagged'; creationPermission: 'open' | 'stewards_only'; pendingRequests: number; flaggedReason?: string }> = {
+  'grp-nairobi-movers': { healthState: 'healthy', creationPermission: 'open', pendingRequests: 2 },
+  'grp-kilimani-endurance': { healthState: 'restricted', creationPermission: 'stewards_only', pendingRequests: 5 },
+  'grp-zenith-mind': { healthState: 'flagged', creationPermission: 'open', pendingRequests: 0, flaggedReason: 'Prototype flag: member-reported cover photo (mock review queue).' },
+};
+
+// ---- Group Charter & Council (member-visible; experience architecture) ----
+
+export const CHARTER_CLAUSE_SUGGESTIONS: { area: string; clauses: string[] }[] = [
+  {
+    area: 'Purpose & identity',
+    clauses: [
+      'We move together to stay consistent and accountable.',
+      'Every member belongs — all paces and levels are welcome.',
+    ],
+  },
+  {
+    area: 'Member conduct',
+    clauses: [
+      'Log honestly — our shared totals only work with real efforts.',
+      'Encourage others with cheers; no shaming slow days.',
+    ],
+  },
+  {
+    area: 'Challenge creation',
+    clauses: [
+      'Any member may create a Challenge unless the group agrees otherwise.',
+      'Creation rules can be limited to stewards by group agreement.',
+    ],
+  },
+  {
+    area: 'Stewardship',
+    clauses: [
+      'Stewards keep the group welcoming and the schedule running.',
+      'Stewards review flagged content and join requests promptly.',
+    ],
+  },
+  {
+    area: 'Participation',
+    clauses: [
+      'Join only the Challenges you want — being in the group never auto-joins you.',
+      'Finish what you start where you can; life happens when it happens.',
+    ],
+  },
+  {
+    area: 'Community standards',
+    clauses: [
+      'Report problems to a steward instead of arguing in the feed.',
+      'Photos and notes stay kind and safe for everyone.',
+    ],
+  },
+];
+
+export const GROUP_CHARTERS: Record<string, GroupCharter> = {
+  'grp-nairobi-movers': {
+    version: 'v2 · active',
+    state: 'active',
+    clauses: [
+      'We move together to stay consistent and accountable.',
+      'Log honestly — our shared totals only work with real efforts.',
+      'Any member may create a Challenge unless the group agrees otherwise.',
+      'Join only the Challenges you want — being in the group never auto-joins you.',
+    ],
+    updated: 'Aug 2026',
+  },
+  'grp-kilimani-endurance': {
+    version: 'v1 · active',
+    state: 'active',
+    clauses: [
+      'Structured training with posted start times — arrive ready.',
+      'Challenge creation is steward-curated by group agreement.',
+      'Safety first on open roads.',
+    ],
+    updated: 'Jul 2026',
+  },
+  'grp-zenith-mind': {
+    version: 'v1 · draft',
+    state: 'draft',
+    clauses: ['Quiet presence and mindful communication.'],
+    updated: 'Sep 2026 (draft)',
+  },
+};
+
+export const GROUP_COUNCILS: Record<string, GroupCouncil> = {
+  'grp-nairobi-movers': {
+    enabled: true,
+    kind: 'advisory',
+    purpose: 'Advise stewards on the monthly schedule and welcome new members.',
+    members: ['Wanjiku Kimani (steward rep)', 'Kipchoge Ngetich', 'Sarah Chen'],
+    stewardRep: 'Wanjiku Kimani',
+  },
+  'grp-kilimani-endurance': {
+    enabled: true,
+    kind: 'challenge_committee',
+    purpose: 'Curate the race calendar and review interval-night safety.',
+    members: ['Kipchoge Ngetich (steward rep)', 'Eric Mutua'],
+    stewardRep: 'Kipchoge Ngetich',
+  },
+  'grp-zenith-mind': { enabled: false, members: [] },
+};
+
+export const EXTRA_CHALLENGES: Challenge[] = [
+  {
+    id: 'ch-upcoming-sunrise',
+    title: 'Sunrise 5K Prep Week',
+    description: 'Upcoming preparatory week before the October race block. Join early to receive start reminders. Participation opens at start; logging is disabled until then.',
+    type: 'collective',
+    groupId: 'grp-nairobi-movers',
+    groupName: 'Nairobi Morning Movers',
+    creatorId: 'user-wanjiku',
+    creatorName: 'Wanjiku Kimani',
+    coverImage: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&auto=format&fit=crop&q=80',
+    status: 'upcoming',
+    startDate: 'Oct 1, 2026',
+    endDate: 'Oct 7, 2026',
+    timezone: 'Africa/Nairobi (EAT)',
+    durationDays: 7,
+    activities: [{ activityId: 'act-running', metric: 'Distance', unit: 'km', targetValue: 60, labelOverride: 'Prep Run' }],
+    targetValue: 60,
+    targetUnit: 'km',
+    summarySentence: 'Everyone contributes toward 60 km of Running over 7 days starting Oct 1.',
+    participants: [],
+    inviteState: 'none',
+  },
+  {
+    id: 'ch-closed-full',
+    title: 'Arboretum Interval Night (Full)',
+    description: 'Closed evening interval session. Capacity reached in the prototype to demonstrate full/closed states.',
+    type: 'competitive',
+    groupId: 'grp-kilimani-endurance',
+    groupName: 'Kilimani Endurance Club',
+    creatorId: 'user-kipchoge',
+    creatorName: 'Kipchoge Ngetich',
+    coverImage: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&auto=format&fit=crop&q=80',
+    status: 'closed',
+    startDate: 'Aug 10, 2026',
+    endDate: 'Aug 10, 2026',
+    timezone: 'Africa/Nairobi (EAT)',
+    durationDays: 1,
+    activities: [{ activityId: 'act-running', metric: 'Distance', unit: 'km', targetValue: 10 }],
+    targetValue: 10,
+    targetUnit: 'km',
+    summarySentence: 'Closed interval night. Capacity 24/24 reached.',
+    participants: [],
+    capacity: 24,
+    isFull: true,
+    finalized: true,
+  },
+  {
+    id: 'ch-flagged-sample',
+    title: 'Flagged: Midnight Ultra (review sample)',
+    description: 'Prototype-only flagged challenge used to demonstrate operator review states. Member view shows restricted notice; operator sees report reason.',
+    type: 'competitive',
+    groupId: 'grp-nairobi-movers',
+    groupName: 'Nairobi Morning Movers',
+    creatorId: 'user-eric',
+    creatorName: 'Eric Mutua',
+    coverImage: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800&auto=format&fit=crop&q=80',
+    status: 'active',
+    startDate: 'Sep 12, 2026',
+    endDate: 'Sep 20, 2026',
+    timezone: 'Africa/Nairobi (EAT)',
+    durationDays: 8,
+    activities: [{ activityId: 'act-running', metric: 'Distance', unit: 'km', targetValue: 50 }],
+    targetValue: 50,
+    targetUnit: 'km',
+    summarySentence: 'Under mock moderation review.',
+    participants: [],
+    isFlagged: true,
+    flaggedReason: 'Prototype flag: unrealistic target pairing reported by 2 members (mock).',
+  },
+];
+
+export const EXTENDED_NOTIFICATIONS: NotificationAlert[] = [
+  { id: 'notif-invite-group', title: 'Group invitation: Zenith Mind & Motion', body: 'Wanjiku invited you to join Zenith Mind & Motion. Invitation expires in 6 days (prototype).', time: '1 hour ago', read: false, type: 'invitation', category: 'group_invite' },
+  { id: 'notif-invite-challenge', title: 'Challenge invitation: Sunrise 5K Prep Week', body: 'You are invited to join Sunrise 5K Prep Week starting Oct 1. Preview before joining.', time: '3 hours ago', read: false, type: 'invitation', category: 'challenge_invite' },
+  { id: 'notif-start', title: 'Challenge starts tomorrow', body: 'Sunrise 5K Prep Week starts tomorrow in Africa/Nairobi (EAT).', time: 'Yesterday', read: true, type: 'milestone', category: 'challenge_start' },
+  { id: 'notif-end', title: 'Challenge ended: Karura Forest 250k Sprint', body: 'Final results are locked. View your retrospective and any policy-qualified Platform Recognition.', time: 'Aug 15, 2026', read: true, type: 'milestone', category: 'challenge_end' },
+  { id: 'notif-recognition', title: 'Platform Recognition recorded', body: '30-Day Consecutive Consistency record was added to your profile where Platform Policy qualified it (mock record — not a verified credential).', time: 'Jul 31, 2026', read: true, type: 'milestone', category: 'recognition' },
+  { id: 'notif-moderation', title: 'System message: content under review', body: 'A challenge you follow is under mock moderation review. No action needed.', time: '2 days ago', read: true, type: 'milestone', category: 'moderation' },
+];
+
+export const SUPPORT_HISTORY_MOCK = [
+  { id: 'sup-1', kind: 'Support Tiizi', title: 'M-Pesa prototype contribution', amount: 'KES 500', date: 'Sep 2, 2026', note: 'Prototype data only — no real payment processed.' },
+  { id: 'sup-2', kind: 'Community Cause', title: 'City Parks pledge dedication', amount: '12 km dedicated', date: 'Sep 10, 2026', note: 'Movement dedication, not a financial transaction.' },
 ];
 
 export const CHALLENGE_TEMPLATES = [

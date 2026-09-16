@@ -75,6 +75,12 @@ export const GroupListView: React.FC<GroupListViewProps> = ({
       </div>
 
       {/* Groups Grid */}
+      {filteredGroups.length === 0 && (
+        <div className="bg-white rounded-2xl border border-zinc-200 p-10 text-center max-w-md mx-auto">
+          <h3 className="text-base font-bold text-zinc-900">No groups match your search</h3>
+          <p className="text-xs text-zinc-500 mt-1">Try a different name, place or focus — or create a new circle. Prototype data only.</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredGroups.map((group) => {
           const groupChallenges = challenges.filter(
@@ -108,6 +114,13 @@ export const GroupListView: React.FC<GroupListViewProps> = ({
                   <div className="absolute top-3 right-3">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 bg-amber-200/95 px-2 py-0.5 rounded-md shadow-2xs">
                       Steward
+                    </span>
+                  </div>
+                )}
+                {group.healthState && group.healthState !== 'healthy' && (
+                  <div className="absolute bottom-3 right-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-2xs ${group.healthState === 'restricted' ? 'bg-amber-500 text-white' : 'bg-rose-600 text-white'}`}>
+                      {group.healthState === 'restricted' ? 'Restricted' : 'Being reviewed'}
                     </span>
                   </div>
                 )}

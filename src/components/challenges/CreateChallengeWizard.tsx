@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Challenge,
   ChallengeType,
+  ChallengeSupportConfig,
+  ChallengeTemplateDraft,
   Group,
   Member,
   MetricType,
   ChallengeActivityConfig,
 } from '../../types';
 import { CANONICAL_ACTIVITIES } from '../../data/canonicalActivities';
+import { challengeTypeLabel, friendlyTimezone } from '../../utils/memberDisplay';
 import { CHALLENGE_TEMPLATES } from '../../data/mockData';
+import { MemberTemplateEntry } from '../operator/OperatorTemplates';
 import {
   X,
   Users,
@@ -40,6 +44,11 @@ interface CreateChallengeWizardProps {
   currentMember: Member;
   onCreateChallenge: (newChallenge: Challenge) => void;
   initialTemplateId?: string;
+  // Template Authoring mode: same flow, ends in a Draft Template (never a
+  // live Challenge). Used by the operator console.
+  authoringMode?: 'challenge' | 'template';
+  onCreateTemplate?: (draft: ChallengeTemplateDraft) => void;
+  templates?: MemberTemplateEntry[];
 }
 
 export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
@@ -50,13 +59,18 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   currentMember,
   onCreateChallenge,
   initialTemplateId,
+  authoringMode = 'challenge',
+  onCreateTemplate,
+  templates,
 }) => {
+  const templateSource = templates ?? CHALLENGE_TEMPLATES;
+  const isTemplateMode = authoringMode === 'template';
   // Step sequence:
   // 1: Choose Archetype & Template (Together, Race, Streak)
   // 2: Host Group & Story
-  // 3: What are we doing? (Canonical Activities)
+  // 3: What are we doing? (activities)
   // 4: What counts? (Metrics, Targets, Daily Rules)
-  // 5: When? (Schedule, Duration, Timezone)
+  // 5: When? (schedule, duration, time)
   // 6: Review: "This is the Challenge you're creating" with section edit links & creator join decision
   const [step, setStep] = useState<number>(1);
 
@@ -84,14 +98,25 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
   // Explicit affirmative creator participation (Product Truth: Creator participation must NOT be assumed)
   const [creatorWillJoin, setCreatorWillJoin] = useState<boolean>(false);
+  // Optional Support Tiizi offer (never a requirement; never scored)
+  const [supportEnabled, setSupportEnabled] = useState(false);
+  const [supportAmounts, setSupportAmounts] = useState<number[]>([1, 2, 5]);
+  const [supportCustom, setSupportCustom] = useState(true);
+  const [supportWhen, setSupportWhen] = useState<'join' | 'during' | 'both'>('both');
+  // Template authoring extras
+  const [tplEditableFields, setTplEditableFields] = useState('target, duration, group, cause');
+  const [tplVisibility, setTplVisibility] = useState<'members' | 'hidden'>('members');
+  const [tplLocales, setTplLocales] = useState('en ready · sw ready');
+  const appliedTemplate = useRef<string | null>(null);
 
-  if (!isOpen) return null;
+  const buildSupportConfig = (): ChallengeSupportConfig | undefined =>
+    supportEnabled
+      ? { enabled: true, suggestedAmounts: supportAmounts, allowCustom: supportCustom, offerWhen: supportWhen, currency: '$' }
+      : undefined;
 
-  const currentHostGroup = allGroups.find((g) => g.id === selectedGroupId) || activeGroup;
-
-  // Apply template helper
-  const handleApplyTemplate = (tplId: string) => {
-    const tpl = CHALLENGE_TEMPLATES.find((t) => t.id === tplId);
+  // Apply template helper (function declaration so the mount effect below can call it)
+  function handleApplyTemplate(tplId: string) {
+    const tpl = templateSource.find((t) => t.id === tplId);
     if (!tpl) return;
 
     setChallengeType(tpl.type);
@@ -122,7 +147,19 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
     }
 
     setStep(2);
-  };
+  }
+
+  useEffect(() => {
+    if (isOpen && initialTemplateId && appliedTemplate.current !== initialTemplateId) {
+      appliedTemplate.current = initialTemplateId;
+      handleApplyTemplate(initialTemplateId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialTemplateId]);
+
+  if (!isOpen) return null;
+
+  const currentHostGroup = allGroups.find((g) => g.id === selectedGroupId) || activeGroup;
 
   // Continuous Natural Language Preview Sentence
   const generateSummary = () => {
@@ -132,11 +169,11 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
     if (challengeType === 'collective') {
       const primary = activityConfigs[selectedActivityIds[0]] || { targetValue: 500, unit: 'km' };
-      return `Everyone in ${currentHostGroup.name} contributes together toward a shared milestone of ${primary.targetValue} ${primary.unit} of ${actNames} over ${durationDays} days in ${timezone}.`;
+      return `Everyone in ${currentHostGroup.name} contributes together toward a shared milestone of ${primary.targetValue} ${primary.unit} of ${actNames} over ${durationDays} days (${friendlyTimezone(timezone)}).`;
     }
     if (challengeType === 'competitive') {
       const primary = activityConfigs[selectedActivityIds[0]] || { targetValue: 100, unit: 'km' };
-      return `Participants in ${currentHostGroup.name} strive to complete ${primary.targetValue} ${primary.unit} of ${actNames} before the ${durationDays}-day window ends in ${timezone}. Qualifying finishers receive standard competition finishing positions.`;
+      return `Participants in ${currentHostGroup.name} strive to complete ${primary.targetValue} ${primary.unit} of ${actNames} before the ${durationDays}-day window ends (${friendlyTimezone(timezone)}). Finishers are ranked in order, with ties sharing a spot.`;
     }
     // Streak
     const reqs = selectedActivityIds
@@ -146,7 +183,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
         return `${c?.targetValue || 15} ${c?.unit || 'min'} of ${act?.name || id}`;
       })
       .join(' and ');
-    return `Complete ${reqs} before the Challenge day ends in ${timezone} to maintain your daily streak over ${durationDays} days.`;
+    return `Complete ${reqs} before today ends to keep your daily streak going over ${durationDays} days.`;
   };
 
   const handleToggleActivity = (actId: string) => {
@@ -220,6 +257,39 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   };
 
   const handleFinish = () => {
+    const supportTiizi = buildSupportConfig();
+    if (isTemplateMode) {
+      // Template Authoring: same setup, ends as a Draft Template — never a
+      // live Challenge. Members pick their group when they use it.
+      const primaryCfg = activityConfigs[selectedActivityIds[0]] || { metric: 'Distance' as MetricType, unit: 'km', targetValue: 100 };
+      const draft: ChallengeTemplateDraft = {
+        id: `tpl-${Date.now()}`,
+        name: title.trim() || 'Untitled Template',
+        type: challengeType,
+        description: description.trim() || 'Template description (mock).',
+        durationDays,
+        ...(challengeType === 'streak'
+          ? {
+              activityIds: [...selectedActivityIds],
+              metrics: selectedActivityIds.map((id) => activityConfigs[id]?.metric ?? 'Duration'),
+              units: selectedActivityIds.map((id) => activityConfigs[id]?.unit ?? 'min'),
+              targetValues: selectedActivityIds.map((id) => Number(activityConfigs[id]?.targetValue ?? 15)),
+            }
+          : {
+              activityId: selectedActivityIds[0],
+              metric: primaryCfg.metric,
+              unit: primaryCfg.unit,
+              targetValue: Number(primaryCfg.targetValue),
+            }),
+        editableFields: tplEditableFields,
+        visibility: tplVisibility,
+        locales: tplLocales,
+        supportTiizi,
+      };
+      onCreateTemplate?.(draft);
+      onClose();
+      return;
+    }
     const finalActivities: ChallengeActivityConfig[] = selectedActivityIds.map((id) => {
       const cfg = activityConfigs[id];
       const act = CANONICAL_ACTIVITIES.find((a) => a.id === id);
@@ -284,6 +354,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
       isCause,
       causeName: isCause ? causeName : undefined,
       participants: initialParticipants,
+      supportTiizi,
       collectiveProgress:
         challengeType === 'collective'
           ? {
@@ -319,7 +390,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
   });
 
   const stepTitles = [
-    'How it works (Archetype)',
+    'How it works (Type)',
     'Who is hosting & story',
     'What are we doing?',
     'What counts & targets?',
@@ -342,8 +413,11 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               </span>
             </div>
             <h2 className="text-xl font-extrabold text-zinc-900 mt-1">
-              Create a Group Challenge
+              {isTemplateMode ? 'Create a Challenge Template' : 'Create a Group Challenge'}
             </h2>
+            {isTemplateMode && (
+              <p className="text-[11px] text-zinc-500 mt-0.5">Template authoring (mock) — same setup flow. Finishes as a Draft Template, never a live Challenge.</p>
+            )}
           </div>
 
           <button
@@ -369,19 +443,19 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
         {/* Step Body */}
         <div className="p-5 sm:p-6 flex-1 overflow-y-auto space-y-6">
-          {/* STEP 1: CHOOSE ARCHETYPE & TEMPLATE */}
+          {/* STEP 1: CHOOSE TYPE & TEMPLATE */}
           {step === 1 && (
             <div className="space-y-6">
               <div>
                 <h3 className="text-base font-bold text-zinc-900">
-                  Choose the Challenge Archetype
+                  Choose the challenge type
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Governed rules determine how participation accumulates and how outcomes are recognized.
+                  Each type counts progress differently — pick the one that fits your group.
                 </p>
               </div>
 
-              {/* 3 Governed Archetypes with dual naming: Human Title + Canonical Label */}
+              {/* Challenge types */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <button
                   type="button"
@@ -399,7 +473,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     <div className="mb-1">
                       <h4 className="font-extrabold text-sm text-zinc-900 leading-tight">Together</h4>
                       <span className="text-[10px] text-zinc-400 font-bold block">
-                        Collective challenge
+                        Everyone adds to one total
                       </span>
                     </div>
                     <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
@@ -427,11 +501,11 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     <div className="mb-1">
                       <h4 className="font-extrabold text-sm text-zinc-900 leading-tight">Race</h4>
                       <span className="text-[10px] text-zinc-400 font-bold block">
-                        Competitive challenge
+                        Finish your own goal
                       </span>
                     </div>
                     <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
-                      Participants strive to hit the qualifying milestone. Standard competition finishing positions (1, 2, 2, 4) with shared ties.
+                      Everyone works toward the same milestone. Finishers are ranked in order, with ties sharing a spot.
                     </p>
                   </div>
                   <span className="mt-4 text-[10px] uppercase font-bold text-rose-800 bg-rose-100 px-2 py-0.5 rounded-md inline-block self-start">
@@ -459,7 +533,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                       </span>
                     </div>
                     <p className="text-xs text-zinc-600 mt-1.5 leading-relaxed">
-                      Build daily habit consistency. Complete requirements before the challenge day ends in the governing timezone.
+                      Build a daily habit. Do the activities on your list before today ends.
                     </p>
                   </div>
                   <span className="mt-4 text-[10px] uppercase font-bold text-orange-800 bg-orange-100 px-2 py-0.5 rounded-md inline-block self-start">
@@ -468,12 +542,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </button>
               </div>
 
-              {/* Ready-to-go Community Templates (Pre-filled configuration shortcuts) */}
+              {/* Ready-to-go templates */}
               <div className="pt-3 border-t border-zinc-100">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                    <span>Pre-filled Configuration Templates</span>
+                    <span>Starting points you can edit</span>
                   </h4>
                   <span className="text-[11px] text-zinc-400">
                     Editable shortcuts into this same creation flow
@@ -481,7 +555,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  {CHALLENGE_TEMPLATES.map((tpl) => (
+                  {templateSource.map((tpl) => (
                     <button
                       key={tpl.id}
                       type="button"
@@ -490,7 +564,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase text-orange-600">
-                          {tpl.type}
+                          {challengeTypeLabel(tpl.type)}
                         </span>
                         <span className="text-[10px] text-zinc-400 font-semibold">
                           {tpl.durationDays} days
@@ -521,7 +595,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </p>
               </div>
 
-              {/* Host Group Selection */}
+              {/* Host Group Selection (host-neutral in template mode) */}
+              {isTemplateMode ? (
+                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs text-zinc-600">
+                  Templates stay host-neutral — members choose their own group when they use this template. No host is stored on the template.
+                </div>
+              ) : (
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
                   Host Community Group
@@ -561,6 +640,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   })}
                 </div>
               </div>
+              )}
 
               {/* Title */}
               <div>
@@ -626,7 +706,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
             </div>
           )}
 
-          {/* STEP 3: WHAT ARE WE DOING? (CANONICAL ACTIVITIES) */}
+          {/* STEP 3: WHAT ARE WE DOING? (activities) */}
           {step === 3 && (
             <div className="space-y-4">
               <div>
@@ -634,17 +714,17 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   What activities count toward this challenge?
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Select canonical activities from the catalogue. Streak challenges support multi-activity daily habits.
+                  Choose activities from the guide. Streak challenges can include more than one daily activity.
                 </p>
               </div>
 
-              {/* Governed Multiplicity Warning for Collective/Race */}
+              {/* One-activity tip for Together/Race */}
               {challengeType !== 'streak' && selectedActivityIds.length > 1 && (
                 <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-950">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold">Governed Configuration Note: </span>
-                    Collective & Race challenges default to measuring a single canonical activity. Combining multiple activities requires governed metric equivalence engines.
+                    <span className="font-bold">Heads up: </span>
+                    Together &amp; Race challenges work best with one activity. Mixing activities needs special setup.
                   </div>
                 </div>
               )}
@@ -655,7 +735,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
-                    placeholder="Search canonical activities..."
+                    placeholder="Search activities..."
                     value={activitySearch}
                     onChange={(e) => setActivitySearch(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden focus:border-orange-500 font-medium"
@@ -724,12 +804,12 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
             </div>
           )}
 
-          {/* STEP 4: WHAT COUNTS & GOAL TARGETS */}
+          {/* STEP 4: WHAT COUNTS & GOALS */}
           {step === 4 && (
             <div className="space-y-5">
               <div>
                 <h3 className="text-base font-bold text-zinc-900">
-                  Configure metrics and targets
+                  Set goals and how they're measured
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
                   {challengeType === 'collective' &&
@@ -760,16 +840,13 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                         <span className="font-bold text-xs text-zinc-900">
                           {act.name} ({act.category})
                         </span>
-                        <span className="text-[10px] font-semibold text-zinc-500">
-                          Canonical ID: {act.id}
-                        </span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {/* Metric Type */}
                         <div>
                           <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                            Governed Metric
+                            How it's measured
                           </label>
                           <select
                             value={cfg.metric}
@@ -833,7 +910,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
             </div>
           )}
 
-          {/* STEP 5: WHEN DOES IT RUN? (SCHEDULE & TIMEZONE) */}
+          {/* STEP 5: WHEN DOES IT RUN? (schedule & time) */}
           {step === 5 && (
             <div className="space-y-4">
               <div>
@@ -841,7 +918,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   When does this challenge take place?
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Governed start date, duration, and time boundary.
+                  Pick a start date, how long it runs, and the time it follows.
                 </p>
               </div>
 
@@ -883,23 +960,23 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </div>
               </div>
 
-              {/* Timezone */}
+              {/* Time setting (explicit here to prevent confusion) */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1.5">
-                  Governing Timezone
+                  Time setting
                 </label>
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
                   className="w-full px-3.5 py-2 text-xs bg-zinc-50 rounded-xl border border-zinc-200 focus:outline-hidden font-medium"
                 >
-                  <option value="Africa/Nairobi (EAT)">Africa/Nairobi (EAT, UTC+3)</option>
-                  <option value="Europe/London (BST/GMT)">Europe/London (BST/GMT, UTC+1)</option>
-                  <option value="America/New_York (EST/EDT)">America/New_York (EST, UTC-5)</option>
-                  <option value="Asia/Tokyo (JST)">Asia/Tokyo (JST, UTC+9)</option>
+                  <option value="Africa/Nairobi (EAT)">Nairobi time (UTC+3)</option>
+                  <option value="Europe/London (BST/GMT)">London time (UTC+1)</option>
+                  <option value="America/New_York (EST/EDT)">New York time (UTC-5)</option>
+                  <option value="Asia/Tokyo (JST)">Tokyo time (UTC+9)</option>
                 </select>
                 <p className="text-[11px] text-zinc-500 mt-1">
-                  Daily resets for streak challenges occur strictly when the challenge day concludes in this governing timezone.
+                  Daily streaks reset when the day ends in this time.
                 </p>
               </div>
             </div>
@@ -913,7 +990,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   This is the Challenge you're creating.
                 </h3>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Review the governed configuration before publishing to {currentHostGroup.name}. Use edit links to adjust any section.
+                  Check your challenge setup before launching it in {currentHostGroup.name}. Use edit links to adjust any section.
                 </p>
               </div>
 
@@ -921,9 +998,9 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               <div className="p-5 rounded-2xl bg-zinc-900 text-white space-y-3 shadow-md">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-orange-500 text-white">
-                    {challengeType === 'collective' && 'Together (Collective)'}
-                    {challengeType === 'competitive' && 'Race (Competitive)'}
-                    {challengeType === 'streak' && 'Streak (Daily Consistency)'}
+                    {challengeType === 'collective' && 'Together'}
+                    {challengeType === 'competitive' && 'Race'}
+                    {challengeType === 'streak' && 'Streak'}
                   </span>
                   <span className="text-xs text-zinc-400 flex items-center gap-1">
                     <Clock className="w-3.5 h-3.5 text-orange-400" />
@@ -941,7 +1018,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
 
                 <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs text-zinc-400">
                   <span>Host Group: <strong className="text-white">{currentHostGroup.name}</strong></span>
-                  <span>Timezone: <strong className="text-white">{timezone}</strong></span>
+                  <span>Time: <strong className="text-white">{friendlyTimezone(timezone)}</strong></span>
                 </div>
               </div>
 
@@ -965,17 +1042,17 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   </button>
                 </div>
 
-                {/* 2. Challenge Archetype */}
+                {/* 2. Challenge type */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                      Archetype & Rules
+                      Type
                     </span>
-                    <p className="text-xs font-bold text-zinc-900 mt-0.5 capitalize">{challengeType} Challenge</p>
+                    <p className="text-xs font-bold text-zinc-900 mt-0.5 capitalize">{challengeTypeLabel(challengeType)} challenge</p>
                     <p className="text-[11px] text-zinc-500">
-                      {challengeType === 'collective' && 'Shared milestone, over-100% permitted'}
-                      {challengeType === 'competitive' && '1, 2, 2, 4 standard competition ties'}
-                      {challengeType === 'streak' && 'Daily habits with timezone reset'}
+                      {challengeType === 'collective' && 'Shared total, can go past 100%'}
+                      {challengeType === 'competitive' && 'Ranked in order, ties share a spot'}
+                      {challengeType === 'streak' && 'Daily activities, reset at day end'}
                     </p>
                   </div>
                   <button
@@ -991,7 +1068,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                      Canonical Activities
+                      Activities
                     </span>
                     <p className="text-xs font-bold text-zinc-900 mt-0.5">
                       {selectedActivityIds.map((id) => CANONICAL_ACTIVITIES.find((a) => a.id === id)?.name).join(', ')}
@@ -1007,14 +1084,14 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   </button>
                 </div>
 
-                {/* 4. Schedule & Timezone */}
+                {/* 4. Schedule & time */}
                 <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start justify-between">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">
-                      Schedule & Boundary
+                      Schedule & time
                     </span>
                     <p className="text-xs font-bold text-zinc-900 mt-0.5">{durationDays} Days • Starts {startDate}</p>
-                    <p className="text-[11px] text-zinc-500">{timezone}</p>
+                    <p className="text-[11px] text-zinc-500">{friendlyTimezone(timezone)}</p>
                   </div>
                   <button
                     onClick={() => setStep(5)}
@@ -1026,16 +1103,17 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                 </div>
               </div>
 
-              {/* Explicit Creator Participation Decision (Product Truth Alignment) */}
+              {/* Will you take part? (creating doesn't join you automatically) */}
+              {!isTemplateMode && (
               <div className="p-4 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2.5">
                 <div className="flex items-center gap-2">
                   <UserCheck className="w-4 h-4 text-amber-700 shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-amber-950">
-                      Creator Participation Decision
+                      Will you take part?
                     </h4>
                     <p className="text-[11px] text-amber-800">
-                      Group Membership ≠ Challenge Participation. Creating a challenge does not enroll you automatically.
+                      Being in the group doesn't join you automatically. Creating a challenge doesn't join you either.
                     </p>
                   </div>
                 </div>
@@ -1065,30 +1143,84 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
                   </button>
                 </div>
               </div>
+              )}
 
-              {/* Governed Rules Checklist */}
+              {/* Optional Support Tiizi offer (never required, never scored) */}
+              <div className="p-4 rounded-xl bg-sky-50/70 border border-sky-200 space-y-2.5 text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-sky-950">Support Tiizi while taking part — optional</h4>
+                    <p className="text-[11px] text-sky-800">Optional — participation is never affected. Members can join and finish with $0. No guilt, no gating.</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button type="button" onClick={() => setSupportEnabled(false)} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${!supportEnabled ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Off</button>
+                    <button type="button" onClick={() => setSupportEnabled(true)} className={`px-2.5 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${supportEnabled ? 'bg-sky-600 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>On</button>
+                  </div>
+                </div>
+                {supportEnabled && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] text-sky-900 font-bold">Suggested:</span>
+                      {[1, 2, 5, 10].map((a) => (
+                        <button key={a} type="button" onClick={() => setSupportAmounts((prev) => prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a].sort((x, y) => x - y))} className={`px-2 py-1 text-[11px] font-bold rounded-lg border cursor-pointer ${supportAmounts.includes(a) ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-600 border-zinc-200'}`}>${a}</button>
+                      ))}
+                      <label className="flex items-center gap-1 text-[11px] text-sky-900 ml-1 cursor-pointer">
+                        <input type="checkbox" checked={supportCustom} onChange={(e) => setSupportCustom(e.target.checked)} className="accent-sky-600" /> Custom amount allowed
+                      </label>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[11px] text-sky-900 font-bold">Offer:</span>
+                      {(['join', 'during', 'both'] as const).map((w) => (
+                        <button key={w} type="button" onClick={() => setSupportWhen(w)} className={`px-2 py-1 text-[11px] font-bold rounded-lg border capitalize cursor-pointer ${supportWhen === w ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-zinc-600 border-zinc-200'}`}>{w === 'join' ? 'On join' : w === 'during' ? 'During' : 'Both'}</button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-sky-800">Belongs to Support Tiizi, not challenge scoring. Separate from any Community Cause.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Template-only settings */}
+              {isTemplateMode && (
+                <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2 text-xs">
+                  <h4 className="font-bold text-zinc-900">Template settings (mock)</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label className="block"><span className="text-[10px] uppercase font-bold text-zinc-400">Allowed editable fields</span>
+                      <input value={tplEditableFields} onChange={(e) => setTplEditableFields(e.target.value)} className="mt-0.5 w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg" /></label>
+                    <label className="block"><span className="text-[10px] uppercase font-bold text-zinc-400">Localisation readiness</span>
+                      <input value={tplLocales} onChange={(e) => setTplLocales(e.target.value)} className="mt-0.5 w-full px-2.5 py-1.5 bg-white border border-zinc-200 rounded-lg" /></label>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-zinc-500">Visibility:</span>
+                    <button type="button" onClick={() => setTplVisibility('members')} className={`px-2 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${tplVisibility === 'members' ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Members</button>
+                    <button type="button" onClick={() => setTplVisibility('hidden')} className={`px-2 py-1 text-[11px] font-bold rounded-lg cursor-pointer ${tplVisibility === 'hidden' ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600'}`}>Hidden</button>
+                  </div>
+                  <p className="text-[10px] text-zinc-500">Finishes as a Draft Template — publish it from Templates before members can use it.</p>
+                </div>
+              )}
+
+              {/* What counts */}
               <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 text-xs space-y-2">
-                <h5 className="font-bold text-zinc-900">Governed Rules Verified:</h5>
+                <h5 className="font-bold text-zinc-900">What counts:</h5>
                 <div className="flex items-center gap-2 text-zinc-700">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Only logs for designated canonical activities count toward this challenge.</span>
+                  <span>Only your chosen activities count toward this challenge.</span>
                 </div>
                 {challengeType === 'streak' && (
                   <div className="flex items-center gap-2 text-zinc-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Daily requirements must be logged before the day ends in {timezone}.</span>
+                    <span>Log your daily activities before today ends ({friendlyTimezone(timezone)}).</span>
                   </div>
                 )}
                 {challengeType === 'collective' && (
                   <div className="flex items-center gap-2 text-zinc-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Total target progress can exceed 100% until the scheduled end date.</span>
+                    <span>The group total can go past 100% until the end date.</span>
                   </div>
                 )}
                 {challengeType === 'competitive' && (
                   <div className="flex items-center gap-2 text-zinc-700">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Qualifying finishers receive standard competition finishing positions (1, 2, 2, 4 ties).</span>
+                    <span>Everyone who finishes is ranked in order — tied members share a spot.</span>
                   </div>
                 )}
               </div>
@@ -1127,7 +1259,7 @@ export const CreateChallengeWizard: React.FC<CreateChallengeWizardProps> = ({
               className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
             >
               <Check className="w-4 h-4" />
-              <span>Launch Challenge</span>
+              <span>{isTemplateMode ? 'Save Draft Template' : 'Launch Challenge'}</span>
             </button>
           )}
         </div>

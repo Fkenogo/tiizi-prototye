@@ -69,10 +69,10 @@ export const ActivityCatalogueView: React.FC = () => {
       {/* Title & Scope */}
       <div className="border-b border-zinc-200 pb-5">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">
-          Canonical Activity Catalogue
+          Activity Guide
         </h1>
         <p className="text-sm text-zinc-600 mt-1">
-          Governed fitness and wellness practices. Challenges only configure verified activities, measurements, and safe form guidance.
+          Fitness and wellness activities to learn, choose from, and log. Every challenge uses these same activities, measurements, and form guidance.
         </p>
       </div>
 
@@ -203,15 +203,15 @@ export const ActivityCatalogueView: React.FC = () => {
             {/* Components notice if any (Left/Right) */}
             {activeActivity.components && (
               <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-900">
-                <span className="font-bold">Multi-Component Activity: </span>
-                Requires bilateral reporting for balanced integrity: {activeActivity.components.join(' and ')}.
+                <span className="font-bold">Two-sided activity: </span>
+                Log both sides to complete it: {activeActivity.components.join(' and ')}.
               </div>
             )}
 
             {/* Governed Metrics & Units Matrix */}
             <div className="pt-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                Governed Metrics & Allowed Units
+                How progress is measured
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {activeActivity.supportedMetrics.map((m) => (

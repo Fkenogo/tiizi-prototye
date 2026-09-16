@@ -31,7 +31,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
   onOpenCreateChallenge,
   onRunAgain,
 }) => {
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'upcoming' | 'completed' | 'closed'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | ChallengeType>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -58,7 +58,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
             Group Challenges
           </h1>
           <p className="text-sm text-zinc-600 mt-1">
-            Structured collective commitments, competitive endurance races, and daily habit streaks.
+            Shared group totals, friendly races, and daily habits.
           </p>
         </div>
 
@@ -86,37 +86,20 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
         </div>
 
         {/* Status Tabs */}
-        <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl">
-          <button
-            onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-              statusFilter === 'all'
-                ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900'
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setStatusFilter('active')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-              statusFilter === 'active'
-                ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900'
-            }`}
-          >
-            Active
-          </button>
-          <button
-            onClick={() => setStatusFilter('completed')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-              statusFilter === 'completed'
-                ? 'bg-white text-zinc-900 shadow-xs'
-                : 'text-zinc-600 hover:text-zinc-900'
-            }`}
-          >
-            Completed
-          </button>
+        <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-xl overflow-x-auto">
+          {(['all', 'active', 'upcoming', 'completed', 'closed'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer capitalize whitespace-nowrap ${
+                statusFilter === s
+                  ? 'bg-white text-zinc-900 shadow-xs'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
+            >
+              {s === 'all' ? 'All' : s}
+            </button>
+          ))}
         </div>
 
         {/* Type Filter Pills */}
@@ -139,7 +122,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
                 : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
             }`}
           >
-            Together (Collective)
+            Together
           </button>
           <button
             onClick={() => setTypeFilter('competitive')}
@@ -149,7 +132,7 @@ export const ChallengeListView: React.FC<ChallengeListViewProps> = ({
                 : 'bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50'
             }`}
           >
-            Race (Competitive)
+            Race
           </button>
           <button
             onClick={() => setTypeFilter('streak')}

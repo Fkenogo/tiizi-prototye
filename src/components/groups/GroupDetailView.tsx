@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Group, Member, Challenge, CommunityMoment } from '../../types';
-import { ALL_MEMBERS } from '../../data/mockData';
+import { ALL_MEMBERS, GROUP_CHARTERS, GROUP_COUNCILS } from '../../data/mockData';
 import {
   Users,
   Shield,
@@ -63,6 +63,17 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
           >
             <span>← Back to All Groups</span>
           </button>
+        </div>
+      )}
+
+      {(group.healthState === 'restricted' || group.healthState === 'flagged') && (
+        <div className={`rounded-2xl border p-3.5 text-xs flex items-start gap-2 ${group.healthState === 'restricted' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`}>
+          <Info className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>
+            {group.healthState === 'restricted'
+              ? <><strong>Only Group stewards can create Challenges in this Group.</strong> Contact {groupStewards[0]?.name || 'a steward'} to ask about creating one.{group.pendingRequests ? ` ${group.pendingRequests} join requests are waiting for review.` : ''}</>
+              : <><strong>Being reviewed:</strong> {group.flaggedReason || 'The Tiizi team is checking this group (sample).'} Roster and challenges stay readable.</>}
+          </span>
         </div>
       )}
 
@@ -145,7 +156,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
               {isJoined ? '✓ Member of Group' : 'Join Group'}
             </button>
 
-            {/* Governed Permission Check: Open Group vs Steward-Led Group */}
+            {/* Who can create: everyone unless this group limits it */}
             {group.allowMemberCreation !== false || isSteward ? (
               <button
                 onClick={onOpenCreateChallenge}
@@ -157,7 +168,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
             ) : (
               <div
                 className="px-3.5 py-2 bg-zinc-100 border border-zinc-200 text-zinc-500 font-semibold text-xs rounded-xl flex items-center gap-1.5 cursor-not-allowed"
-                title="Only designated group stewards may initiate challenges in this club"
+                title="This group's rule restricts creation to stewards. Default in other groups: any member may create."
               >
                 <Lock className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Steward-Curated Challenges</span>
@@ -166,12 +177,12 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
           </div>
         </div>
 
-        {/* Affirmative Participation Callout Banner */}
+        {/* What joining means */}
         <div className="bg-amber-50/70 border-b border-amber-200/60 px-5 py-2.5 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-amber-950 font-medium">
             <Shield className="w-4 h-4 text-amber-700 shrink-0" />
             <span>
-              <strong>Governed Principle:</strong> Group Membership ≠ Challenge Participation. Being in {group.name} provides community eligibility; you choose which challenges to affirmatively join.
+              <strong>Good to know:</strong> being in {group.name} doesn't automatically join you to its Challenges — you choose which ones to join.
             </span>
           </div>
         </div>
@@ -220,7 +231,7 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
               Active & Upcoming Group Challenges
             </h2>
             <span className="text-xs text-zinc-500">
-              Note: Being in this Group does not auto-enroll you. Join challenges affirmatively!
+              Being in this Group doesn't join you automatically — join the Challenges you want!
             </span>
           </div>
 
@@ -307,6 +318,42 @@ export const GroupDetailView: React.FC<GroupDetailViewProps> = ({
                 </li>
               ))}
             </ul>
+          </div>
+
+          {GROUP_CHARTERS[group.id] && (
+            <div className="pt-4 border-t border-zinc-100">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">
+                Group Charter <span className="ml-1 normal-case font-semibold text-zinc-400">{GROUP_CHARTERS[group.id].version}{GROUP_CHARTERS[group.id].state === 'draft' ? ' (draft)' : ''}</span>
+              </h3>
+              <ul className="space-y-2">
+                {GROUP_CHARTERS[group.id].clauses.map((c, idx) => (
+                  <li key={idx} className="text-xs text-zinc-700 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="pt-4 border-t border-zinc-100">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-2">
+              Stewards{GROUP_COUNCILS[group.id]?.enabled ? ' & Council' : ''}
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {groupStewards.map((s) => (
+                <span key={s.id} className="text-[11px] font-bold bg-orange-100 text-orange-800 px-2 py-1 rounded-lg">{s.name} · Steward</span>
+              ))}
+            </div>
+            {GROUP_COUNCILS[group.id]?.enabled ? (
+              <div className="mt-2 p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs">
+                <p className="font-bold">Advisory council{GROUP_COUNCILS[group.id].kind ? ` · ${GROUP_COUNCILS[group.id].kind!.replace('_', ' ')}` : ''}</p>
+                {GROUP_COUNCILS[group.id].purpose && <p className="text-zinc-600 mt-0.5">{GROUP_COUNCILS[group.id].purpose}</p>}
+                <p className="text-zinc-600 mt-1">{GROUP_COUNCILS[group.id].members.join(' · ')}</p>
+              </div>
+            ) : (
+              <p className="text-[11px] text-zinc-500 mt-2">No council — the stewards look after this group.</p>
+            )}
           </div>
         </div>
       )}
